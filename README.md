@@ -179,28 +179,28 @@ docker compose up -d --build
 flowchart LR
   %% -------- Gmail --------
   subgraph Gmail
-    A[Mailbox\n(IMAP)]
+    A[Mailbox (IMAP)]
   end
 
   %% -------- WebApp --------
   subgraph WebApp[PHP/Apache Web App]
-    B1[fetch_mail.php\n- IMAP 검색/수집\n- 라벨/키워드 트리거\n- AI 분석 호출\n- HTML 저장\n- 첨부 링크 생성]
-    B2[index.php\n- 메일 뷰어 UI]
-    B3[archive.php\n- 문서 아카이브 UI\n- 라벨/기간/FTS\n- CSV/XLS]
-    B4[admin_action.php\n- 보관/복원/삭제\n- 감사로그]
+    B1[fetch_mail.php: IMAP, 라벨/트리거, AI 분석, HTML 저장]
+    B2[index.php: 메일 뷰어]
+    B3[archive.php: 아카이브 UI, 라벨/기간/CSV]
+    B4[admin_action.php: 보관/복원/삭제, 감사로그]
   end
 
   %% -------- AI Provider --------
   subgraph AI[Provider]
-    C[OpenAI or leemgs\nChat Completions]
+    C[OpenAI / leemgs Chat Completions]
   end
 
   %% -------- Storage --------
   subgraph Storage
-    D1[SQLite/MySQL\nmessages]
-    D2[소송/계약/거버넌스 HTML]
+    D1[(DB: SQLite/MySQL)]
+    D2[HTML 저장소]
     D3[보관 폴더]
-    D4[audit_log.csv]
+    D4[(audit_log.csv)]
   end
 
   %% -------- Edges --------
