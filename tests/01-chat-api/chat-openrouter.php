@@ -38,5 +38,5 @@ curl_close($ch);
 
 // 결과 출력
 $result = json_decode($response, true);
-echo "🤖 모델 응답:\n";
-echo $result['choices'][0]['message']['content'] ?? "응답 없음";
+echo "🤖 모델 응답:<br>";
+echo nl2br($result['choices'][0]['message']['content'] ?? "응답 없음");
