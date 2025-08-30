@@ -1,6 +1,6 @@
-# PHP Examples for OpenAI & Inference APIs
+# PHP Examples for OpenAI & Self-Inference APIs
 
-이 저장소는 **OpenAI Chat Completions API** 및 **OpenAI vs Inference(LGStrial) 엔드포인트 비교**를 위한 PHP 예제를 포함합니다.  
+이 저장소는 **OpenAI Chat Completions API** 및 **OpenAI vs Self-Inference (LGStrial) 엔드포인트 비교**를 위한 PHP 예제를 포함합니다.  
 각 폴더에는 독립적인 예제 코드와 README가 있습니다.
 
 ---
