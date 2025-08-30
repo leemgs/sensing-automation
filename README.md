@@ -177,28 +177,33 @@ docker compose up -d --build
 
 ```mermaid
 flowchart LR
+  %% -------- Gmail --------
   subgraph Gmail
-    A[Mailbox<br/>(IMAP)]
+    A[Mailbox\n(IMAP)]
   end
 
+  %% -------- WebApp --------
   subgraph WebApp[PHP/Apache Web App]
-    B1[fetch_mail.php<br/>- IMAP 검색/수집<br/>- 라벨/키워드 트리거<br/>- AI 분석 호출<br/>- HTML 저장<br/>- 첨부 링크 생성]
-    B2[index.php<br/>- 메일 뷰어 UI]
-    B3[archive.php<br/>- 문서 아카이브 UI<br/>- 라벨/기간/FTS<br/>- CSV/XLS]
-    B4[admin_action.php<br/>- 보관/복원/삭제<br/>- 감사로그]
+    B1[fetch_mail.php\n- IMAP 검색/수집\n- 라벨/키워드 트리거\n- AI 분석 호출\n- HTML 저장\n- 첨부 링크 생성]
+    B2[index.php\n- 메일 뷰어 UI]
+    B3[archive.php\n- 문서 아카이브 UI\n- 라벨/기간/FTS\n- CSV/XLS]
+    B4[admin_action.php\n- 보관/복원/삭제\n- 감사로그]
   end
 
+  %% -------- AI Provider --------
   subgraph AI[Provider]
-    C[OpenAI or leemgs<br/>Chat Completions]
+    C[OpenAI or leemgs\nChat Completions]
   end
 
+  %% -------- Storage --------
   subgraph Storage
-    D1[(SQLite/MySQL<br/>messages)]
-    D2[[소송/계약/거버넌스 HTML]]
-    D3[[보관 폴더]]
-    D4[(audit_log.csv)]
+    D1[SQLite/MySQL\nmessages]
+    D2[소송/계약/거버넌스 HTML]
+    D3[보관 폴더]
+    D4[audit_log.csv]
   end
 
+  %% -------- Edges --------
   A -->|IMAP| B1
   B1 -->|분석 요청| C
   C -->|JSON 응답| B1
@@ -209,6 +214,7 @@ flowchart LR
   B4 --> D2
   B4 --> D3
   B4 --> D4
+
 ```
 
 ---
