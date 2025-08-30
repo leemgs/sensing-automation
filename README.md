@@ -44,7 +44,7 @@ v3/
    └─ logo.png
 ```
 
-> 운영 환경에서는 `public/`, `src/`, `storage/` 구조 분리를 권장합니다. (README 하단 참조)
+> 운영 환경에서는 `public/`, `src/`, `storage/` 구조 분리를 권장합니다.
 
 ---
 
