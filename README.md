@@ -4,6 +4,14 @@ PHP + Apache 기반으로 Gmail(IMAP)에서 메일을 수집하고, OpenAI 또�
 
 > ✅ 요구사항: PHP 8.1+, php-imap 확장, cURL, (선택) Docker
 
+
+```mermaid
+graph TD;
+    A-->B;
+    A-->C;
+    B-->D;
+    C-->D;
+```
 ---
 
 ## ✨ 주요 기능
