@@ -178,16 +178,39 @@ docker compose up -d --build
 
 ```mermaid
 graph LR
-  A[Mailbox IMAP] -->|IMAP| B1[fetch_mail.php: IMAP, label trigger, AI, save HTML]
-  B1 -->|request| C[Chat Completions (OpenAI/leemgs)]
+  subgraph Gmail
+    A[Mailbox IMAP]
+  end
+
+  subgraph WebApp
+    B1[fetch_mail.php: IMAP label AI save]
+    B2[index.php: viewer]
+    B3[archive.php: archive UI]
+    B4[admin_action.php: manage]
+  end
+
+  subgraph AI
+    C[Chat Completions OpenAI leemgs]
+  end
+
+  subgraph Storage
+    D1[(DB SQLite/MySQL)]
+    D2[HTML store]
+    D3[Archive folder]
+    D4[(audit_log.csv)]
+  end
+
+  A -->|IMAP| B1
+  B1 -->|request| C
   C -->|response| B1
-  B1 -->|upsert| D1[(DB SQLite/MySQL)]
-  B1 -->|save HTML| D2[HTML store]
-  B2[index.php: viewer] <-->|fetch_mail JSON| B1
-  B3[archive.php: archive UI] <-->|files meta| D2
-  B4[admin_action.php: archive restore delete audit] --> D2
-  B4 --> D3[Archive folder]
-  B4 --> D4[(audit_log.csv)]
+  B1 -->|upsert| D1
+  B1 -->|save HTML| D2
+  B2 <-->|fetch_mail JSON| B1
+  B3 <-->|files meta| D2
+  B4 --> D2
+  B4 --> D3
+  B4 --> D4
+
 ```
 ---
 
