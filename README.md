@@ -5,13 +5,6 @@ PHP + Apache 기반으로 Gmail(IMAP)에서 메일을 수집하고, OpenAI 또�
 > ✅ 요구사항: PHP 8.1+, php-imap 확장, cURL, (선택) Docker
 
 
-```mermaid
-graph TD;
-    A-->B;
-    A-->C;
-    B-->D;
-    C-->D;
-```
 ---
 
 ## ✨ 주요 기능
@@ -184,47 +177,18 @@ docker compose up -d --build
 
 
 ```mermaid
-flowchart LR
-  %% -------- Gmail --------
-  subgraph Gmail
-    A[Mailbox (IMAP)]
-  end
-
-  %% -------- WebApp --------
-  subgraph WebApp[PHP/Apache Web App]
-    B1[fetch_mail.php: IMAP, 라벨/트리거, AI 분석, HTML 저장]
-    B2[index.php: 메일 뷰어]
-    B3[archive.php: 아카이브 UI, 라벨/기간/CSV]
-    B4[admin_action.php: 보관/복원/삭제, 감사로그]
-  end
-
-  %% -------- AI Provider --------
-  subgraph AI[Provider]
-    C[OpenAI / leemgs Chat Completions]
-  end
-
-  %% -------- Storage --------
-  subgraph Storage
-    D1[(DB: SQLite/MySQL)]
-    D2[HTML 저장소]
-    D3[보관 폴더]
-    D4[(audit_log.csv)]
-  end
-
-  %% -------- Edges --------
-  A -->|IMAP| B1
-  B1 -->|분석 요청| C
-  C -->|JSON 응답| B1
-  B1 -->|upsert| D1
-  B1 -->|save HTML| D2
-  B2 <-->|fetch_mail(JSON)| B1
-  B3 <-->|파일/메타 조회| D2
-  B4 --> D2
-  B4 --> D3
-  B4 --> D4
-
+graph LR
+  A[Mailbox IMAP] -->|IMAP| B1[fetch_mail.php: IMAP, label trigger, AI, save HTML]
+  B1 -->|request| C[Chat Completions (OpenAI/leemgs)]
+  C -->|response| B1
+  B1 -->|upsert| D1[(DB SQLite/MySQL)]
+  B1 -->|save HTML| D2[HTML store]
+  B2[index.php: viewer] <-->|fetch_mail JSON| B1
+  B3[archive.php: archive UI] <-->|files meta| D2
+  B4[admin_action.php: archive restore delete audit] --> D2
+  B4 --> D3[Archive folder]
+  B4 --> D4[(audit_log.csv)]
 ```
-
 ---
 
 ## 🧩 운영 팁
