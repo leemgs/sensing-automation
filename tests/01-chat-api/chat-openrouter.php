@@ -43,10 +43,10 @@ $output = $result['choices'][0]['message']['content'] ?? "응답 없음";
 // 실행 환경 판별: CLI vs Web
 if (php_sapi_name() === 'cli') {
     // CLI 모드 → 줄바꿈 유지
-    echo "🤖 모델 응답 (CLI):\n";
+    echo "🤖 <b><font color=blue>모델 응답 (CLI):</b></font>\n";
     echo $output . "\n";
 } else {
     // Web 모드 → HTML 줄바꿈 변환
-    echo "🤖 모델 응답 (Web):<br>";
+    echo "🤖 <b><font color=blue>모델 응답 (Web):</b></font><br>";
     echo nl2br(htmlspecialchars($output));
 }
