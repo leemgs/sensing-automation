@@ -16,3 +16,18 @@ Wireframe → Prototype → Demo → Spike/PoC → Feasibility → Skeleton → 
 | **Beta**        | 외부 사용자 피드백  | 주요 기능 완성, 불안정    | 클로즈드 베타 앱            |
 | **RC**          | 출시 직전 안정화   | 버그만 수정, 기능 고정    | Release Candidate 1  |
 | **GA**          | 정식 출시       | 상용 수준 안정성        | App Store/Play 정식 배포 |
+
+
+```mermaid
+flowchart LR
+    A[Wireframe<br/>(UI 구조 스케치)] --> B[Prototype<br/>(UX/흐름 검증)]
+    B --> C[Demo<br/>(아이디어 시연)]
+    C --> D[Spike/PoC<br/>(기술 가능성 검증)]
+    D --> E[Feasibility<br/>(타당성 검토)]
+    E --> F[Skeleton<br/>(코드 뼈대)]
+    F --> G[MVP<br/>(최소 기능 제품)]
+    G --> H[Alpha<br/>(내부 테스트)]
+    H --> I[Beta<br/>(외부 피드백)]
+    I --> J[RC<br/>(출시 후보)]
+    J --> K[GA<br/>(정식 출시)]
+```
