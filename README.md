@@ -1,177 +1,24 @@
-# 📬 Gmail IMAP → AI 분석 아카이브 (소송/계약/거버넌스)
+# Gmail/IMAP → Web: AI 기반 데이타 수집/분류/보관/예측 시스템
 
-PHP + Apache 기반으로 Gmail(IMAP)에서 메일을 수집하고, OpenAI 또는 leemgs(Inference Cloud) 모델을 이용해 **소송 / 계약 / 거버넌스** 관련 메일을 **자동 분석**하여 **구조화된 HTML 문서**로 저장·아카이브하는 웹앱입니다.
+이 저장소는 **Gmail IMAP**으로 메일을 가져와, **키워드/라벨 기반 라우팅 + LLM 분석**을 통해
+`소송/계약/거버넌스/보관` 폴더에 자동 저장하고, 웹 UI로 열람/관리할 수 있는 PHP 애플리케이션입니다.
 
-> ✅ 요구사항: PHP 8.1+, php-imap 확장, cURL, (선택) Docker
-
-
----
-
-## ✨ 주요 기능
-
-- **IMAP 연동**: Gmail 메일함에서 최근 메일 검색/수집 (라벨 필터 지원)
-- **자동 분석**: OpenAI 또는 leemgs 모델을 통해 소송/계약/거버넌스 메타데이터 추출
-- **문서화 & 아카이브**: `YYYYMMDD-제목.html` 포맷으로 폴더 저장 (소송/계약/거버넌스/보관)
-- **첨부 다운로드**: 각 메일의 첨부파일을 직접 다운로드
-- **읽음/삭제 제어**: UI에서 읽음(Seen) / 삭제(Delete) 수행 → DB/IMAP 반영
-- **검색/필터**: 라벨(단일/다중), 기간, 본문 FTS, 키워드, 정렬
-- **CSV/Excel 내보내기**: 현재 필터 결과를 CSV/XLS로 내보내기
-- **감사 로그**: 보관/복원/삭제 액션을 `audit_log.csv`로 기록
-- **멀티 프로바이더**: `api_provider=openai|leemgs` 스위치
+- IMAP 수집 → 분류(라벨/키워드/LLM) → HTML 아카이브 생성 → 웹에서 조회
+- OpenAI 또는 **OpenRouter(= `api_provider: leemgs`)** 중 하나로 LLM 호출
 
 ---
 
-## 🏗 폴더 구조
+## 주요 기능
 
-```
-v3/
-├─ config.php
-├─ db.php
-├─ imap_client.php
-├─ ai_extractor.php
-├─ fetch_mail.php
-├─ index.php
-├─ archive.php
-├─ admin_action.php
-├─ download_attachment.php
-├─ set_seen.php
-├─ delete_mail.php
-├─ .htaccess
-├─ docker/
-│  └─ apache-vhost.conf
-├─ Dockerfile
-├─ docker-compose.yml
-└─ static/
-   └─ logo.png
-```
-
-> 운영 환경에서는 `public/`, `src/`, `storage/` 구조 분리를 권장합니다.
+- **IMAP 수집**: 지정 라벨/키워드에 맞는 메일만 가져오기(옵션).
+- **자동 분류/저장**: 소송/계약/거버넌스/보관으로 라우팅, HTML 문서 생성.
+- **AI 추출**: 메일에서 제목/번호/상대방/일자 등 핵심 필드를 JSON으로 추출.
+- **웹 UI**: 목록/검색/다운로드/삭제/보관/복원(관리 토큰 필요), 자동 갱신 폴링.
+- **감사 로그**: `audit_log.csv`에 관리자 액션 기록.
 
 ---
 
-## ⚙️ 설치
 
-### 1) ZIP 다운로드
-- 이 저장소의 `project.zip`을 받아 원하는 서버로 업로드/압축해제 합니다.
-
-### 2) 의존성 (php-imap 등)
-- 리눅스: `apt-get install php-imap` 후 `phpenmod imap && systemctl restart apache2`
-- Docker 사용 시 본 저장소의 Dockerfile에 포함되어 있습니다.
-
-### 3) 설정 파일 수정: `config.php`
-- **Gmail IMAP 계정/앱 비밀번호**
-- **API 프로바이더/키/모델/URL**
-- **저장 폴더 경로, 라벨 필터, 키워드, 토큰** 등
-```php
-return [
-  'username' => 'yourname@gmail.com',
-  'password' => 'app-password',
-  'api_provider' => 'openai', // 또는 'leemgs'
-  'openai_api_key' => 'sk-...',
-  'openai_model'   => 'gpt-4o-mini',
-  'openai_url'     => 'https://api.openai.com/v1/chat/completions',
-  'leemgs_api_key' => 'base64encoded==',
-  'leemgs_model'   => 'myllm-30b-instruct',
-  'leemgs_url'     => 'https://www.inference-cloud.com/myllm-30b-instruct/v1/chat/completions',
-  'analysis_label_filter' => ['업무'],
-  'category_label_map' => [
-    'lawsuit'    => ['업무-소송','legal-lawsuit','소송'],
-    'contract'   => ['업무-계약','contract','계약'],
-    'governance' => ['업무-거버넌스','governance','거버넌스','policy'],
-  ],
-  'admin_token' => 'change-this-long-random-token',
-];
-```
-
----
-
-## ▶️ 실행 방법
-
-### A) 로컬 PHP 내장서버(개발용)
-```bash
-php -S localhost:8000
-# 브라우저 http://localhost:8000/index.php
-```
-
-### B) Apache 배포
-- DocumentRoot를 프로젝트 루트로 설정 (동봉 `.htaccess` 사용)
-- PHP 8.1+ 및 php-imap 확장 활성화
-
-### C) Docker / Docker Compose
-```bash
-docker compose up -d --build
-# 브라우저 http://localhost:8080
-```
-
----
-
-## 🖥 사용 방법
-
-### 1) 메일 뷰어: `index.php`
-- 검색어(X-GM-RAW), 라벨, 최대 개수를 입력하여 조회
-- 각 메일 카드에서 **읽음/삭제** 및 **첨부 다운로드** 가능
-- 자동 새로고침(간격: `config.php`의 `poll_interval`)
-
-### 2) 수집/분석: `fetch_mail.php`
-- IMAP에서 메일을 수집하고, 라벨/키워드/설정에 따라
-  - **소송 / 계약 / 거버넌스** 중 대상만 **AI 분석**
-  - 결과를 **HTML 문서**로 저장 (제목/날짜/라벨/보낸사람 메타 포함)
-
-### 3) 아카이브: `archive.php`
-- 카테고리/라벨(단일/다중)/기간/본문 FTS/정렬 필터
-- **CSV/XLS 내보내기**
-- **미리보기/새탭/다운로드**, **보관/복원/삭제** (토큰 필요)
-
----
-
-## 🔐 보안
-
-- `config.php`에는 민감 정보(API 키, 비밀번호)가 있으니 **비공개 관리**
-- `admin_action.php` 호출 시 `admin_token` 필수
-- 운영 환경에선 `public/`/`src/`/`storage/` 구조로 분리해 **코드/키**가 웹에서 노출되지 않게 하세요.
-- HTTPS 사용 권장
-
----
-
-## 🔄 프로바이더 스위치 (OpenAI ↔ leemgs)
-
-- `config.php`에서 `api_provider` 값을 변경
-  - `openai` → OpenAI Chat Completions
-  - `leemgs` → Inference Cloud(`myllm-30b-instruct`) Chat Completions
-- 두 API 모두 `choices[0].message.content`를 사용하는 응답 포맷을 전제로 함
-
----
-
-## 🧠 분석 로직 (요약)
-
-1. **라벨 가드**: `analysis_label_filter` 조건을 만족한 메일만 분석
-2. **카테고리 결정**:
-   - (A) **라벨→카테고리** 매핑 우선
-   - (B) 미히트 시 **키워드**로 보조 트리거
-   - 옵션) `exclusive_routing=true` 일 때 우선순위 한 개만 실행
-3. **저장 포맷**:
-   - `소송/YYYYMMDD-소송제목.html`
-   - `계약/YYYYMMDD-계약제목.html`
-   - `거버넌스/YYYYMMDD-정책명.html`
-
----
-
-## 📡 주요 엔드포인트
-
-- `GET fetch_mail.php?q=&label=&limit=` → 메일 목록 JSON
-- `POST set_seen.php { uid, seen }` → 읽음/해제
-- `POST delete_mail.php { uid }` → 삭제
-- `GET download_attachment.php?uid=&part=` → 첨부 다운로드
-- `POST admin_action.php { token, action: archive|restore|delete, rel }` → 문서 보관/복원/삭제
-
----
-
-## 🗃 데이터베이스
-
-- `db.php`가 SQLite(기본) 또는 MySQL 스키마를 자동 생성
-- `messages` 테이블: `uid, subject, from_addr, date_utc, seen, labels, snippet, deleted, *_saved`
-
----
 
 ## 🧱 아키텍처 다이어그램 (Mermaid)
 
@@ -212,42 +59,222 @@ graph LR
   B4 --> D4
 
 ```
----
 
-## 🧩 운영 팁
 
-- **권한**: `소송/`, `계약/`, `거버넌스/`, `보관/`, `audit_log.csv`, `/var/www/data`는 웹서버 계정에 쓰기 허용
-- **라벨 기반 수집 제한**: `restrict_imap_search=true` 사용 시 기본 조회도 라벨로 제한
-- **성능**: `max_messages`, `poll_interval` 조정, 분석 요청은 최소화(비용 주의)
 
----
 
-## 🧪 권장 구조(배포형)
+## 폴더 구조
+
 
 ```
-project-root/
-├─ public/            # DocumentRoot
-├─ src/               # 애플리케이션 코드
-├─ storage/           # 문서/아카이브/DB/로그
-├─ config/            # example 설정
-├─ .env               # 실제 비밀값
-└─ docker/            # 배포 스크립트
+v04/
+  config.php
+  db.php
+  imap_client.php
+  ai_extractor.php
+  fetch_mail.php
+  download_attachment.php
+  set_seen.php
+  delete_mail.php
+  index.php
+  admin_action.php
+  archive.php
+  .gitignore
+  .env.example
+  Dockerfile
+  docker-compose.yml
+  docker/
+    apache-vhost.conf
+  static/
+    logo.png
+  (생성됨) 소송/ 계약/ 거버넌스/ 보관/
+  (생성됨) /var/www/data/mailcache.sqlite (기본 설정 사용 시)
+```
+
+> 실제 저장 폴더 경로는 `config.php`의 디렉토리 설정을 따릅니다.
+
+---
+
+## 요구 사항
+
+- PHP 8.1+
+  - 확장: `imap`, `pdo_sqlite`(또는 `pdo_mysql`), `curl`, `mbstring`, `json`
+- 웹서버(Apache/Nginx) 또는 PHP 내장 서버(개발용)
+- (선택) Docker & Docker Compose
+
+---
+
+## 설치
+
+### 1) 환경 변수 파일 준비
+
+`.env.example`를 복사해 `.env`를 만들고 값을 채웁니다.
+
+```bash
+cp .env.example .env
+vim .env
+```
+
+`.env` 주요 항목:
+
+```dotenv
+# === Gmail IMAP ===
+GMAIL_USERNAME=yourname@gmail.com
+GMAIL_APP_PASSWORD=앱비밀번호_또는_IMAP_비번   # 2단계 인증 사용 시 '앱 비밀번호' 필요
+
+# === DB ===
+# 기본: SQLite
+DB_DSN=sqlite:/var/www/data/mailcache.sqlite
+DB_USER=
+DB_PASS=
+
+# MySQL 예시
+# DB_DSN=mysql:host=127.0.0.1;dbname=mailcache;charset=utf8mb4
+# DB_USER=dbuser
+# DB_PASS=dbpass
+
+# === API Keys ===
+OPENAI_API_KEY=sk-...
+OPENROUTER_API_KEY=sk-or-...
+
+# === 관리자 보호 토큰 ===
+ADMIN_TOKEN=긴_랜덤_토큰
+```
+
+> `config.php`는 내부 미니 로더로 `.env`를 자동 로드하며, 값이 없을 경우만 기본값을 사용합니다.
+
+### 2) Gmail 준비
+
+- Gmail **설정 → 전달 및 POP/IMAP → IMAP 사용**.
+- 계정에 2단계 인증(권장)을 켜고 **앱 비밀번호**를 발급 후 `.env`의 `GMAIL_APP_PASSWORD`에 입력.
+
+### 3) 권한/디렉토리
+
+- SQLite 기본 사용 시: `/var/www/data/` 디렉토리 생성 및 웹서버 쓰기 권한 부여.
+  ```bash
+  sudo mkdir -p /var/www/data
+  sudo chown -R www-data:www-data /var/www/data
+  sudo chmod 775 /var/www/data
+  ```
+- 아카이브 폴더(소송/계약/거버넌스/보관)는 자동 생성됩니다. 퍼미션 이슈 시 동일하게 권한을 조정하세요.
+
+---
+
+## 실행 방법
+
+### A) Docker Compose (권장)
+
+```bash
+# 프로젝트 루트에서
+docker compose up -d
+# 또는
+docker-compose up -d
+```
+
+- 브라우저에서 `http://localhost/` 접속
+- `docker/apache-vhost.conf`로 `/var/www/html`에 소스가 탑재되도록 설정되어 있습니다.
+
+### B) 로컬 PHP (개발용)
+
+```bash
+php -S 0.0.0.0:8080 -t v3
+# http://localhost:8080 로 접속
+```
+
+> 실제 운영에선 Apache/Nginx를 사용하세요.
+
+---
+
+## LLM 프로바이더 설정
+
+`config.php`의 `api_provider` 값으로 선택합니다.
+
+- OpenAI 사용:
+  ```php
+  'api_provider' => 'openai',
+  ```
+  - `.env`의 `OPENAI_API_KEY` 필요
+  - 모델: `openai_model` (기본 `gpt-4o-mini`)
+
+- **OpenRouter 사용(= leemgs 분기)**:
+  ```php
+  'api_provider' => 'leemgs',
+  ```
+  - `.env`의 `OPENROUTER_API_KEY` 필요
+  - 모델: `leemgs_model` (기본 `openai/gpt-4o`)
+  - 엔드포인트: `https://openrouter.ai/api/v1/chat/completions`
+
+> **참고**: `ai_extractor.php`에서 leemgs 분기는 이미 OpenRouter 규격(`Bearer` 토큰, `messages`, `temperature`, `max_tokens`)으로 맞춰져 있습니다.
+
+---
+
+## 웹 UI 사용법
+
+- `index.php`: 메일 목록/검색/보기. 자동 갱신 주기(`poll_interval`)는 `config.php`에서 조절.
+- `fetch_mail.php`: 메일 수집/갱신 API.
+- `download_attachment.php`: 첨부파일 다운로드.
+- `admin_action.php`: **보관/삭제/복원** 등의 관리자 액션(요청 시 `ADMIN_TOKEN` 필요).
+- `archive.php`: 저장된 HTML 문서/아카이브 열람.
+
+저장 위치(기본):
+- `소송_dir`, `계약_dir`, `거버넌스_dir`, `보관_dir` 경로에 문서 생성
+- 상단 로고/면책문(브랜딩)은 `config.php`의 `branding`에서 제어
+
+---
+
+## 분류 로직(요약)
+
+`config.php`의 다음 옵션을 조합해 라우팅합니다.
+
+- **라벨 → 카테고리 맵**: `category_label_map` + `category_label_match`
+- **키워드 트리거**: `keywords`
+- **LLM 분석 가드**:
+  - `analysis_label_filter`: 지정 라벨 메일만 AI 분석
+  - `analysis_match_mode`: `any|all`
+  - `restrict_imap_search`: true면 **수집 자체**를 라벨로 제한
+- **기타**:
+  - `always_analysis`: 모든 메일 분석(비용 증가)
+  - `exclusive_routing`: 배타 라우팅
+  - `exclusive_priority`: 충돌 시 우선순위
+
+---
+
+## 보안 가이드
+
+- `.gitignore`에 **`.env`** 포함(커밋 방지).
+- `ADMIN_TOKEN`은 충분히 길고 추측 불가능한 값으로 설정.
+- 가능한 한 `.env`와 아카이브 디렉토리를 **웹 루트 밖**에 두고 심볼릭 링크/별도 보호를 고려.
+- 네트워크 환경에서 OpenRouter/OpenAI 키가 로그에 노출되지 않도록 주의.
+
+---
+
+## 트러블슈팅
+
+- **IMAP 인증 실패**: IMAP 사용 설정/앱 비밀번호 확인, 계정 보호 조치(2FA 등) 재점검.
+- **cURL 401/403**: API 키 확인(유효/활성/요금제), `Authorization: Bearer` 여부 확인.
+- **권한 오류**: `/var/www/data` 또는 아카이브 폴더 쓰기 권한 확인.
+- **타임아웃**: `ai_extractor.php`의 cURL 타임아웃을 조정하거나, 모델/토큰/프롬프트 크기 점검.
+- **JSON 파싱 실패**: 모델 응답에 JSON 이외 텍스트가 섞이는 경우 프롬프트를 보수적으로 조정.
+
+---
+
+## 빠른 테스트 (OpenRouter 예시)
+
+```bash
+export OPENROUTER_API_KEY="sk-or-..."
+curl https://openrouter.ai/api/v1/chat/completions   -H "Content-Type: application/json"   -H "Authorization: Bearer $OPENROUTER_API_KEY"   -d '{
+    "model": "openai/gpt-4o",
+    "messages": [
+      {"role": "user", "content": "OpenAI API를 PHP에서 사용하는 예제를 보여줘."}
+    ],
+    "max_tokens": 512
+  }'
 ```
 
 ---
 
-## ⚠️ 주의사항 / 한계
+## 감사 로그
 
-- 메일 콘텐츠를 AI 프로바이더로 전송하므로 **내부 정책/법무 검토** 필요
-- 라벨 파싱은 Gmail 헤더/X-GM-LABELS 의존 → 환경에 따라 차이 가능
-- Inference Cloud 응답 포맷이 OpenAI와 달라질 경우 `ai_extractor.php`의 `call_chat_api()` 조정 필요
-
----
-
-## 🤝 기여
-
-1. 이슈 등록: 버그/개선 제안
-2. 브랜치: `feature/your-feature`
-3. PR 제출: 설명/테스트 포함
+- `audit_log.csv`에 관리자 액션이 기록됩니다(시간/액션/대상/아이디 등).
 
 ---
