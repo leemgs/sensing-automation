@@ -174,52 +174,41 @@ docker compose up -d --build
 
 ## 🧱 아키텍처 다이어그램 (Mermaid)
 
+
 ```mermaid
 flowchart LR
   subgraph Gmail
-    A[Mailbox
-(IMAP)]
+    A[Mailbox<br/>(IMAP)]
   end
 
   subgraph WebApp[PHP/Apache Web App]
-    B1[fetch_mail.php
-- IMAP 검색/수집
-- 라벨/키워드 트리거
-- AI 분석 호출
-- HTML 저장
-- 첨부 링크 생성]
-    B2[index.php
-- 메일 뷰어 UI]
-    B3[archive.php
-- 문서 아카이브 UI
-- 라벨/기간/FTS
-- CSV/XLS]
-    B4[admin_action.php
-- 보관/복원/삭제
-- 감사로그]
+    B1[fetch_mail.php<br/>- IMAP 검색/수집<br/>- 라벨/키워드 트리거<br/>- AI 분석 호출<br/>- HTML 저장<br/>- 첨부 링크 생성]
+    B2[index.php<br/>- 메일 뷰어 UI]
+    B3[archive.php<br/>- 문서 아카이브 UI<br/>- 라벨/기간/FTS<br/>- CSV/XLS]
+    B4[admin_action.php<br/>- 보관/복원/삭제<br/>- 감사로그]
   end
 
   subgraph AI[Provider]
-    C[OpenAI or leemgs
-Chat Completions]
+    C[OpenAI or leemgs<br/>Chat Completions]
   end
 
   subgraph Storage
-    D1[(SQLite/MySQL)
-messages]
+    D1[(SQLite/MySQL<br/>messages)]
     D2[[소송/계약/거버넌스 HTML]]
     D3[[보관 폴더]]
     D4[(audit_log.csv)]
   end
 
-  A -- IMAP --> B1
-  B1 -- 분석 요청 --> C
-  C -- JSON 응답 --> B1
-  B1 -- upsert --> D1
-  B1 -- save HTML --> D2
-  B2 <-- fetch_mail(JSON) --> B1
-  B3 <-- 파일/메타 조회 --> D2
-  B3 -- 보관/복원/삭제 --> B4 --> D2 & D3 & D4
+  A -->|IMAP| B1
+  B1 -->|분석 요청| C
+  C -->|JSON 응답| B1
+  B1 -->|upsert| D1
+  B1 -->|save HTML| D2
+  B2 <-->|fetch_mail(JSON)| B1
+  B3 <-->|파일/메타 조회| D2
+  B4 --> D2
+  B4 --> D3
+  B4 --> D4
 ```
 
 ---
