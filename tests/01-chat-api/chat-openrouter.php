@@ -1,5 +1,5 @@
 <?php
-// .env 파일 로드 (vlucas/phpdotenv 라이브러리 권장, 없으면 간단히 parse_ini_file 사용)
+// .env 파일 로드
 $env = parse_ini_file(__DIR__ . '/.env');
 $apiKey = $env["OPENROUTER_API_KEY"] ?? null;
 
@@ -36,7 +36,17 @@ if (curl_errno($ch)) {
 }
 curl_close($ch);
 
-// 결과 출력
+// 결과 파싱
 $result = json_decode($response, true);
-echo "🤖 모델 응답:<br>";
-echo nl2br($result['choices'][0]['message']['content'] ?? "응답 없음");
+$output = $result['choices'][0]['message']['content'] ?? "응답 없음";
+
+// 실행 환경 판별: CLI vs Web
+if (php_sapi_name() === 'cli') {
+    // CLI 모드 → 줄바꿈 유지
+    echo "🤖 모델 응답:\n";
+    echo $output . "\n";
+} else {
+    // Web 모드 → HTML 줄바꿈 변환
+    echo "🤖 모델 응답:<br>";
+    echo nl2br(htmlspecialchars($output));
+}
