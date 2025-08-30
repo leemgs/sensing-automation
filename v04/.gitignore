@@ -1,0 +1,11 @@
+
+# security
+.env
+
+# dependencies / artifacts (optional but recommended)
+vendor/
+node_modules/
+data/
+*.sqlite
+*.log
+.DS_Store

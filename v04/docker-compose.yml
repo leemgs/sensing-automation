@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: php-imap-app
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+      - ./data:/var/www/data
+      - ./config.php:/var/www/html/config.php
+    restart: unless-stopped
