@@ -29,7 +29,7 @@
 
 각 폴더 내부의 `README.md`를 참고하여 예제를 실행하면 됩니다.
 
-- **OpenAI 단일 실행** → [`01-openai-chagpt4`](./01-openai-chagpt4)  
+- **OpenAI 단일 실행** → [`01-openai-chat`](./01-openai-chat)  
 - **OpenAI vs Inference 비교 실행** → [`02-endpoint-compare`](./02-endpoint-compare)  
 
 ---
