@@ -90,10 +90,15 @@ project/
 ## ⚙️ 요구 사항
 
 * PHP 8.1+
-
   * 확장: `imap`, `pdo_sqlite`(또는 `pdo_mysql`), `curl`, `mbstring`, `json`
 * Apache/Nginx 또는 PHP 내장 서버
 * (선택) Docker & Docker Compose
+```bash
+sudo apt-get install php-imap
+sudo phpenmod imap
+sudo systemctl restart apache2
+```
+
 
 ---
 
