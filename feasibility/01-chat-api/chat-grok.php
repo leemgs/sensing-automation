@@ -1,10 +1,18 @@
 <?php
-// Grok API 키 입력
-$apiKey = "gsk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+// .env 파일에서 설정 로드
+$env = parse_ini_file(__DIR__ . '/.env');
+
+$apiKey = $env['GROK_API_KEY'] ?? null;
+$model  = $env['GROK_MODEL'] ?? 'grok-2-latest';
+$base   = $env['GROK_BASE_URL'] ?? 'https://api.x.ai';
+
+if (!$apiKey) {
+    die("❌ GROK_API_KEY 가 .env 파일에 설정되어 있지 않습니다.\n");
+}
 
 // API 요청 데이터 (Chat Completions)
 $data = [
-    "model" => "grok-2-latest",   // 사용할 Grok 모델
+    "model" => $model,
     "messages" => [
         ["role" => "system", "content" => "You are a helpful assistant."],
         ["role" => "user", "content" => "PHP에서 Grok API 사용 예제를 보여줘."]
@@ -13,12 +21,13 @@ $data = [
 ];
 
 // cURL 초기화
-$ch = curl_init("https://api.x.ai/v1/chat/completions");
+$url = rtrim($base, '/') . '/v1/chat/completions';
+$ch = curl_init($url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     "Content-Type: application/json",
-    "Authorization: " . "Bearer " . $apiKey
+    "Authorization: Bearer " . $apiKey
 ]);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data, JSON_UNESCAPED_UNICODE));
 
