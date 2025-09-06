@@ -2,9 +2,9 @@
 // ★ 보안상 실제 운영에선 웹루트 밖에 두고 include 하세요.
 return [
     // Gmail 주소(아이디)
-    'username' => 'yourname@gmail.com',
+    'username' => 'leemgs.sensing@gmail.com',
     // 2단계 인증 계정의 "앱 비밀번호" (16자리 공백x)
-    'password' => 'xxxx xxxx xxxx xxxx',
+    'password' => 'jvbdfjhrhcdxtvmr',
     // IMAP 서버 설정
     'imap_host' => 'imap.gmail.com',
     'imap_port' => 993,
