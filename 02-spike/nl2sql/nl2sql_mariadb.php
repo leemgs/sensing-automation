@@ -2,31 +2,35 @@
 /**
  * nl2sql_mariadb.php — Natural Language to SQL (MariaDB) with OpenRouter Chat Completions
  * PHP 8.1+ / MariaDB 10.5+ / Apache or PHP-FPM
- * - 모든 환경 설정은 .env 로 이동 (.env → getenv → 기본값 순으로 로드)
- * - LLM 호출부를 OpenRouter로 변경 (messages 기반 Chat Completions)
+ *
+ * 🔧 What’s fixed/hardened
+ *  - .env loader: trims blanks/quotes; empty strings now fall back to sane defaults
+ *  - Paths: /var/log or /var/cache not writable -> automatically falls back to local ./logs, ./schema_cache
+ *  - DB charset fallback: utf8mb4 -> utf8 (prevents "Unknown character set" 2019)
+ *  - OpenRouter call: robust headers (Authorization, Referer, X-Title), clear error messages
+ *  - UI: shows effective paths and cache state; safer HTML escaping
  */
 
 header('Content-Type: text/html; charset=UTF-8');
 mb_internal_encoding('UTF-8');
 
-/* ---------- .env 로더 & 헬퍼 ---------- */
+/* ---------- .env loader & helpers ---------- */
 function loadEnvArray(string $path): array {
     if (!is_file($path)) return [];
     $arr = @parse_ini_file($path, false, INI_SCANNER_TYPED);
     return is_array($arr) ? $arr : [];
 }
 function env_val(array $env, string $key, mixed $default = null): mixed {
-    // .env 값 우선 → getenv → default
+    // .env → getenv → default ; treat empty/blank as unset
     $v = $env[$key] ?? getenv($key) ?? null;
     if (is_string($v)) {
-        $v = trim($v);
-        if ($v === '') $v = null; // ★ 빈 문자열이면 폴백 허용
+        $v = trim($v, " \t\n\r\0\x0B\"'");
+        if ($v === '') $v = null;
     }
     return $v ?? $default;
 }
 function env_int(array $env, string $key, int $default): int {
     $v = env_val($env, $key, null);
-    if ($v === null || $v === '') return $default;
     return is_numeric($v) ? (int)$v : $default;
 }
 function env_bool(array $env, string $key, bool $default = false): bool {
@@ -34,14 +38,13 @@ function env_bool(array $env, string $key, bool $default = false): bool {
     if ($v === null) return $default;
     if (is_bool($v)) return $v;
     $s = strtolower(trim((string)$v));
-    if ($s === '') return $default; // ★ 빈 문자열이면 폴백
+    if ($s === '') return $default;
     return in_array($s, ['1','true','on','yes'], true) ? true
          : (in_array($s, ['0','false','off','no'], true) ? false : $default);
 }
-
 function html($s) { return htmlspecialchars((string)$s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
 
-/* ---------- 환경설정 로드 ---------- */
+/* ---------- load config ---------- */
 $ENV = loadEnvArray(__DIR__.'/.env');
 
 $CFG = [
@@ -59,53 +62,91 @@ $CFG = [
     'or_endpoint'     => env_val($ENV, 'OPENROUTER_ENDPOINT', 'https://openrouter.ai/api/v1/chat/completions'),
     'or_temperature'  => (float)env_val($ENV, 'OPENROUTER_TEMPERATURE', 0.1),
     'or_max_tokens'   => env_int($ENV, 'OPENROUTER_MAX_TOKENS', 800),
-    // Optional headers (recommended by OpenRouter)
-    'or_referer'      => env_val($ENV, 'OPENROUTER_HTTP_REFERER', ''), // e.g., https://your.domain
+    // optional meta headers
+    'or_referer'      => env_val($ENV, 'OPENROUTER_HTTP_REFERER', ''),
     'or_title'        => env_val($ENV, 'OPENROUTER_X_TITLE', 'NL→SQL App'),
 
-    // 생성/실행 제약
+    // Safety/limits
     'max_schema_tables'   => env_int($ENV, 'MAX_SCHEMA_TABLES', 30),
     'sample_rows_per_tbl' => env_int($ENV, 'SAMPLE_ROWS_PER_TBL', 0),
     'auto_limit_default'  => env_int($ENV, 'AUTO_LIMIT_DEFAULT', 200),
     'execution_enabled'   => env_bool($ENV, 'EXECUTION_ENABLED', false),
 
-    // 로그/캐시
-    'log_dir'            => env_val($ENV, 'LOG_DIR', __DIR__ . '/logs'),
-    'log_file'           => null,
-    'schema_cache_dir'   => env_val($ENV, 'SCHEMA_CACHE_DIR', __DIR__ . '/schema_cache'),
-    'schema_cache_file'  => null,
-    'schema_cache_ttl'   => env_int($ENV, 'SCHEMA_CACHE_TTL', 3600),
+    // Paths (will be normalized to effective paths)
+    'log_dir'           => env_val($ENV, 'LOG_DIR', __DIR__ . '/logs'),
+    'schema_cache_dir'  => env_val($ENV, 'SCHEMA_CACHE_DIR', __DIR__ . '/schema_cache'),
+    'schema_cache_ttl'  => env_int($ENV, 'SCHEMA_CACHE_TTL', 3600),
 
     // UI
     'app_title' => env_val($ENV, 'APP_TITLE', '자연어 → SQL 생성기 (MariaDB + OpenRouter)'),
 ];
 
-$CFG['log_file'] = rtrim($CFG['log_dir'], '/').'/queries.log';
-$CFG['schema_cache_file'] = rtrim($CFG['schema_cache_dir'], '/').'/schema.json';
+/* ---------- ensure writable dirs with fallbacks ---------- */
+function ensureWritableDir(string $preferred, string $fallback): array {
+    // returns [effective_path, fell_back(bool)]
+    $p = rtrim($preferred, '/');
+    if (@is_dir($p) || @mkdir($p, 0775, true)) {
+        if (is_writable($p)) return [$p, false];
+    }
+    $f = rtrim($fallback, '/');
+    if (!@is_dir($f)) @mkdir($f, 0775, true);
+    return [$f, true];
+}
+[$logDirEff, $logFallback]   = ensureWritableDir($CFG['log_dir'], __DIR__.'/logs');
+[$cacheDirEff, $cacheFallback] = ensureWritableDir($CFG['schema_cache_dir'], __DIR__.'/schema_cache');
+$CFG['log_dir_effective']   = $logDirEff;
+$CFG['schema_cache_dir_effective'] = $cacheDirEff;
+$CFG['log_file']            = $CFG['log_dir_effective'] . '/queries.log';
+$CFG['schema_cache_file']   = $CFG['schema_cache_dir_effective'] . '/schema.json';
 
-/* ---------- DB 연결 ---------- */
+/* ---------- last-resort defaults (belt & suspenders) ---------- */
+$CFG['db_host']  = $CFG['db_host']  ?: '127.0.0.1';
+$CFG['db_name']  = $CFG['db_name']  ?: 'regulation';
+$CFG['or_model'] = $CFG['or_model'] ?: 'openai/gpt-4o-mini';
+
+/* ---------- DB connection with charset fallback ---------- */
 function pdo(): PDO {
     static $pdo = null;
-    global $CFG;
     if ($pdo) return $pdo;
-    $dsn = "mysql:host={$CFG['db_host']};port={$CFG['db_port']};dbname={$CFG['db_name']};charset={$CFG['charset']}";
-    $options = [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    ];
-    $pdo = new PDO($dsn, $CFG['db_user'], $CFG['db_pass'], $options);
-    $pdo->exec("SET SESSION SQL_SAFE_UPDATES=1");
-    return $pdo;
+    global $CFG;
+
+    $candidates = array_values(array_unique([
+        trim((string)$CFG['charset'] ?: ''),
+        'utf8mb4',
+        'utf8',
+    ]));
+
+    $lastErr = null;
+    foreach ($candidates as $cs) {
+        if ($cs === '') continue;
+        $dsn = "mysql:host={$CFG['db_host']};port={$CFG['db_port']};dbname={$CFG['db_name']};charset={$cs}";
+        $options = [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        ];
+        try {
+            $pdo = new PDO($dsn, $CFG['db_user'], $CFG['db_pass'], $options);
+            $pdo->exec("SET SESSION SQL_SAFE_UPDATES=1");
+            // try explicit NAMES (no-op if unsupported)
+            try { $pdo->exec("SET NAMES {$cs}"); } catch (Throwable $ignore) {}
+            return $pdo;
+        } catch (Throwable $e) {
+            $msg = $e->getMessage();
+            if (stripos($msg, 'unknown character set') !== false || stripos($msg, 'charset') !== false) {
+                $lastErr = $e; // try next candidate
+                continue;
+            }
+            throw $e; // other errors -> bubble up
+        }
+    }
+    throw ($lastErr ?: new RuntimeException('DB connection failed (charset fallback exhausted)'));
 }
 
-/* ---------- 로깅 ---------- */
+/* ---------- logging ---------- */
 function ensureLogReady(): void {
     global $CFG;
-    if (!is_dir($CFG['log_dir'])) @mkdir($CFG['log_dir'], 0775, true);
-    if (!file_exists($CFG['log_file'])) {
-        @touch($CFG['log_file']);
-        @chmod($CFG['log_file'], 0664);
-    }
+    if (!is_dir($CFG['log_dir_effective'])) @mkdir($CFG['log_dir_effective'], 0775, true);
+    if (!file_exists($CFG['log_file'])) { @touch($CFG['log_file']); @chmod($CFG['log_file'], 0664); }
 }
 function logQuery(array $entry): void {
     global $CFG;
@@ -122,9 +163,7 @@ function logQuery(array $entry): void {
         'error'     => $entry['error']    ?? '',
     ];
     $msg = implode("\t", [
-        $line['ts'],
-        $line['ip'],
-        $line['action'],
+        $line['ts'], $line['ip'], $line['action'],
         'executed=' . ($line['executed'] ? '1':'0'),
         'rows=' . $line['row_count'],
         'err=' . str_replace(["\n","\r","\t"], ' ', (string)$line['error']),
@@ -133,28 +172,20 @@ function logQuery(array $entry): void {
         'SQL=' . str_replace(["\n","\r"], ' ', $line['sql']),
     ]) . PHP_EOL;
     $fh = @fopen($CFG['log_file'], 'ab');
-    if ($fh) {
-        @flock($fh, LOCK_EX);
-        @fwrite($fh, $msg);
-        @flock($fh, LOCK_UN);
-        @fclose($fh);
-    }
+    if ($fh) { @flock($fh, LOCK_EX); @fwrite($fh, $msg); @flock($fh, LOCK_UN); @fclose($fh); }
 }
 
-/* ---------- 스키마 캐시 ---------- */
+/* ---------- schema cache ---------- */
 function ensureSchemaCacheReady(): void {
     global $CFG;
-    if (!is_dir($CFG['schema_cache_dir'])) @mkdir($CFG['schema_cache_dir'], 0775, true);
+    if (!is_dir($CFG['schema_cache_dir_effective'])) @mkdir($CFG['schema_cache_dir_effective'], 0775, true);
 }
 function loadSchemaCache(): ?array {
     global $CFG;
     if (!file_exists($CFG['schema_cache_file'])) return null;
-    $mtime = @filemtime($CFG['schema_cache_file']);
-    if (!$mtime) return null;
-    $age = time() - $mtime;
-    if ($age > $CFG['schema_cache_ttl']) return null;
-    $raw = @file_get_contents($CFG['schema_cache_file']);
-    if ($raw === false || $raw === '') return null;
+    $mtime = @filemtime($CFG['schema_cache_file']); if (!$mtime) return null;
+    if ((time() - $mtime) > $CFG['schema_cache_ttl']) return null;
+    $raw = @file_get_contents($CFG['schema_cache_file']); if ($raw === false || $raw === '') return null;
     $data = json_decode($raw, true);
     return is_array($data) ? $data : null;
 }
@@ -175,7 +206,7 @@ function getSchemaSummaryWithCache(PDO $pdo, string $dbName, bool $forceRefresh 
     return ['schema' => $schema, 'cache' => $forceRefresh ? 'refresh' : 'miss'];
 }
 
-/* ---------- 스키마 요약 ---------- */
+/* ---------- schema summarization ---------- */
 function summarizeSchema(PDO $pdo, string $dbName, int $maxTables, int $sampleRows): array {
     $tables = $pdo->prepare("
         SELECT TABLE_NAME, TABLE_COMMENT, TABLE_ROWS
@@ -269,12 +300,13 @@ function makeSchemaPrompt(array $schema): string {
     return implode("\n", $lines);
 }
 
-/* ---------- OpenRouter 호출 (Chat Completions) ---------- */
+/* ---------- OpenRouter (Chat Completions) ---------- */
 function llmGenerateSql_viaOpenRouter(string $naturalQuestion, string $schemaText): string {
     global $CFG;
 
-    $apiKey = $CFG['or_api_key'];
-    if (!$apiKey) throw new RuntimeException("OPENROUTER_API_KEY 가 설정되어 있지 않습니다 (.env).");
+    if (!$CFG['or_api_key']) {
+        throw new RuntimeException("OPENROUTER_API_KEY 가 설정되어 있지 않습니다 (.env).");
+    }
 
     $system = <<<SYS
 You are a senior data analyst expert in MariaDB SQL.
@@ -306,22 +338,17 @@ USER;
             ["role" => "system", "content" => $system],
             ["role" => "user",   "content" => $user  ],
         ],
-        // OpenRouter 호환 옵션
         "temperature" => $CFG['or_temperature'],
         "max_tokens"  => $CFG['or_max_tokens'],
     ];
 
     $headers = [
-        "Authorization: Bearer ".$apiKey,
+        "Authorization: Bearer ".$CFG['or_api_key'],
         "Content-Type: application/json",
     ];
-    // OpenRouter 권장(선택)
-    if (!empty($CFG['or_referer'])) {
-        $headers[] = "HTTP-Referer: ".$CFG['or_referer'];
-    }
-    if (!empty($CFG['or_title'])) {
-        $headers[] = "X-Title: ".$CFG['or_title'];
-    }
+    if (!empty($CFG['or_referer'])) $headers[] = "Referer: ".$CFG['or_referer'];         // standard
+    if (!empty($CFG['or_referer'])) $headers[] = "HTTP-Referer: ".$CFG['or_referer'];    // OpenRouter doc variant
+    if (!empty($CFG['or_title']))   $headers[] = "X-Title: ".$CFG['or_title'];
 
     $ch = curl_init();
     curl_setopt_array($ch, [
@@ -334,29 +361,36 @@ USER;
     ]);
     $resp = curl_exec($ch);
     $err  = curl_error($ch);
-    if ($err) throw new RuntimeException("OpenRouter API 요청 실패: ".$err);
-    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
-    if ($code < 200 || $code >= 300) {
-        throw new RuntimeException("OpenRouter API 에러 (HTTP {$code}): ".$resp);
+
+    if ($err) throw new RuntimeException("OpenRouter API 요청 실패(cURL): ".$err);
+    if ($http < 200 || $http >= 300) {
+        throw new RuntimeException("OpenRouter API 에러 (HTTP {$http}): ".substr((string)$resp, 0, 500));
     }
 
     $json = json_decode($resp, true);
     $text = $json['choices'][0]['message']['content'] ?? null;
-    if (!$text) $text = (string)$resp;
+    if (!$text) {
+        // 마지막 안전망
+        $text = (string)$resp;
+    }
 
     $sql = extractSqlFromText($text);
+    if (!trim($sql)) {
+        throw new RuntimeException("LLM 응답에서 SQL을 추출하지 못했습니다.");
+    }
     return trim($sql);
 }
 
-/* ---------- 응답 텍스트에서 SQL만 추출 ---------- */
+/* ---------- extract SQL from LLM text ---------- */
 function extractSqlFromText(string $text): string {
     if (preg_match('/```sql\\s*(.*?)```/is', $text, $m)) return $m[1];
     if (preg_match('/```\\s*(.*?)```/is', $text, $m))     return $m[1];
     return $text;
 }
 
-/* ---------- SQL 유효성 & 실행 ---------- */
+/* ---------- SQL validation & execution ---------- */
 function isSelectOnly(string $sql): bool {
     $stmts = array_filter(array_map('trim', preg_split('/;\\s*/', $sql)));
     if (empty($stmts)) return false;
@@ -379,7 +413,7 @@ function runSelect(PDO $pdo, string $sql): array {
     return $stmt->fetchAll();
 }
 
-/* ---------- 요청/응답 ---------- */
+/* ---------- request/response ---------- */
 $question = $_POST['question'] ?? '';
 $action   = $_POST['action']   ?? 'generate';
 $force    = isset($_POST['schema_refresh']) && $_POST['schema_refresh'] === '1';
@@ -388,6 +422,9 @@ $generatedSql = '';
 $resultRows   = [];
 $errorMsg     = '';
 $cacheState   = '';
+$fallbackNotes = [];
+if ($logFallback)   $fallbackNotes[] = 'log->local';
+if ($cacheFallback) $fallbackNotes[] = 'cache->local';
 
 try {
     if ($question) {
@@ -397,7 +434,6 @@ try {
         $schemaT    = makeSchemaPrompt($schema);
 
         if ($action === 'generate' || $action === 'execute') {
-            // 🔁 OpenRouter로 SQL 생성
             $generatedSql = llmGenerateSql_viaOpenRouter($question, $schemaT);
 
             if (!isSelectOnly($generatedSql)) {
@@ -489,15 +525,14 @@ small.badge{display:inline-block;background:#eef2ff;border:1px solid #c7d2fe;col
 </head>
 <body>
   <h1><?=html($CFG['app_title'])?></h1>
-<p class="meta">
-  DB: <b><?= html($CFG['db_name'] ?: '(unset)') ?></b>
-  @ <?= html($CFG['db_host'] ?: '(unset)') ?>:<?= html($CFG['db_port']) ?>
-  · 모델: <b><?= html($CFG['or_model'] ?: '(unset)') ?></b>
-  · 실행 허용: <?= $CFG['execution_enabled'] ? 'ON' : 'OFF' ?>
-  <?php if (!empty($cacheState)): ?><span class="badge">캐시: <?=html($cacheState)?></span><?php endif; ?>
-</p>
-
-    
+  <p class="meta">
+    DB: <b><?=html($CFG['db_name'] ?: '(unset)')?></b>
+    @ <?=html($CFG['db_host'] ?: '(unset)')?>:<?=html($CFG['db_port'])?>
+    · 모델: <b><?=html($CFG['or_model'] ?: '(unset)')?></b>
+    · 실행 허용: <?= $CFG['execution_enabled'] ? 'ON' : 'OFF' ?>
+    <?php if (!empty($cacheState)): ?><span class="badge">캐시: <?=html($cacheState)?></span><?php endif; ?>
+    <?php if ($fallbackNotes): ?><span class="badge">폴백: <?=html(implode(',', $fallbackNotes))?></span><?php endif; ?>
+  </p>
 
   <form method="post">
     <label for="question">질문 (자연어)</label><br>
@@ -554,12 +589,11 @@ small.badge{display:inline-block;background:#eef2ff;border:1px solid #c7d2fe;col
   <details>
     <summary><b>도움말</b> (열기)</summary>
     <ul>
-      <li><b>.env</b>에 <kbd>OPENROUTER_API_KEY</kbd>를 설정하세요. (파일 권한 0640 권장)</li>
+      <li><b>.env</b>에 <kbd>OPENROUTER_API_KEY</kbd>를 설정하세요. (현재: <?=html($CFG['or_api_key'] ? '설정됨' : '미설정')?>)</li>
       <li>모델/엔드포인트는 <code>OPENROUTER_MODEL</code>, <code>OPENROUTER_ENDPOINT</code>로 제어합니다.</li>
-      <li>실행을 허용하려면 <code>EXECUTION_ENABLED=true</code>로 설정하세요(읽기 전용 계정 권장).</li>
-      <li>생성된 SQL은 내부 검증을 통과해야 실행됩니다(SELECT/WITH만 허용·위험 토큰 차단·LIMIT 강제).</li>
-      <li>스키마 캐시는 TTL <?=$CFG['schema_cache_ttl']?>초 유지, 체크박스로 강제 새로고침 가능.</li>
-      <li>로그: <code><?=html($CFG['log_file'])?></code> · 캐시: <code><?=html($CFG['schema_cache_file'])?></code></li>
+      <li>실행을 허용하려면 <code>EXECUTION_ENABLED=true</code>로 설정(읽기 전용 계정 권장).</li>
+      <li>스키마 캐시 TTL: <?=$CFG['schema_cache_ttl']?>초 · 캐시 파일: <code><?=html($CFG['schema_cache_file'])?></code></li>
+      <li>로그 파일: <code><?=html($CFG['log_file'])?></code> (경로 권한 이슈 시 자동 폴백)</li>
     </ul>
   </details>
 
