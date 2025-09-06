@@ -16,20 +16,29 @@ function loadEnvArray(string $path): array {
     return is_array($arr) ? $arr : [];
 }
 function env_val(array $env, string $key, mixed $default = null): mixed {
-    return $env[$key] ?? getenv($key) ?? $default;
-}
-function env_bool(array $env, string $key, bool $default = false): bool {
-    $v = env_val($env, $key, null);
-    if (is_bool($v)) return $v;
-    if ($v === null) return $default;
-    $s = strtolower(trim((string)$v));
-    return in_array($s, ['1','true','on','yes'], true) ? true
-         : (in_array($s, ['0','false','off','no'], true) ? false : $default);
+    // .env 값 우선 → getenv → default
+    $v = $env[$key] ?? getenv($key) ?? null;
+    if (is_string($v)) {
+        $v = trim($v);
+        if ($v === '') $v = null; // ★ 빈 문자열이면 폴백 허용
+    }
+    return $v ?? $default;
 }
 function env_int(array $env, string $key, int $default): int {
     $v = env_val($env, $key, null);
+    if ($v === null || $v === '') return $default;
     return is_numeric($v) ? (int)$v : $default;
 }
+function env_bool(array $env, string $key, bool $default = false): bool {
+    $v = env_val($env, $key, null);
+    if ($v === null) return $default;
+    if (is_bool($v)) return $v;
+    $s = strtolower(trim((string)$v));
+    if ($s === '') return $default; // ★ 빈 문자열이면 폴백
+    return in_array($s, ['1','true','on','yes'], true) ? true
+         : (in_array($s, ['0','false','off','no'], true) ? false : $default);
+}
+
 function html($s) { return htmlspecialchars((string)$s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
 
 /* ---------- 환경설정 로드 ---------- */
