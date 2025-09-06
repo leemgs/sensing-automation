@@ -16,7 +16,7 @@ $data = [
     "model" => "openai/gpt-4o",
     "messages" => [
         ["role" => "system", "content" => "You are a helpful assistant."],
-        ["role" => "user", "content" => "OpenAI API를 PHP에서 사용하는 예제를 보여줘."]
+        ["role" => "user", "content" => "2010년, 2020년, 2030년(미래)의 시대가 각각 기술적으로 어떤 큰 변화가 생기는지 테이블로 요약 정리하고 시사점을 작성하세요."]
     ],
     "max_tokens" => 512,
     "temperature" => 0.7
