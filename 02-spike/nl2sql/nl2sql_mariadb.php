@@ -489,12 +489,15 @@ small.badge{display:inline-block;background:#eef2ff;border:1px solid #c7d2fe;col
 </head>
 <body>
   <h1><?=html($CFG['app_title'])?></h1>
-  <p class="meta">
-    DB: <b><?=html($CFG['db_name'])?></b> @ <?=html($CFG['db_host'])?>:<?=html($CFG['db_port'])?>
-    · 모델: <b><?=html($CFG['or_model'])?></b>
-    · 실행 허용: <?= $CFG['execution_enabled'] ? 'ON' : 'OFF' ?>
-    <?php if (!empty($cacheState)): ?><span class="badge">캐시: <?=html($cacheState)?></span><?php endif; ?>
-  </p>
+<p class="meta">
+  DB: <b><?= html($CFG['db_name'] ?: '(unset)') ?></b>
+  @ <?= html($CFG['db_host'] ?: '(unset)') ?>:<?= html($CFG['db_port']) ?>
+  · 모델: <b><?= html($CFG['or_model'] ?: '(unset)') ?></b>
+  · 실행 허용: <?= $CFG['execution_enabled'] ? 'ON' : 'OFF' ?>
+  <?php if (!empty($cacheState)): ?><span class="badge">캐시: <?=html($cacheState)?></span><?php endif; ?>
+</p>
+
+    
 
   <form method="post">
     <label for="question">질문 (자연어)</label><br>
