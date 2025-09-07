@@ -9,7 +9,12 @@
   body{font-family:system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin:20px;}
   h1{font-size:1.25rem;margin-bottom:8px}
   .meta{color:#666;margin-bottom:14px}
-  .list{display:grid;gap:12px}
+  .wrap{display:grid;grid-template-columns:1.1fr 1.9fr;gap:16px;align-items:start}
+  .list{display:grid;gap:12px;max-height:70vh;overflow:auto}
+  .viewer{border:1px solid #e5e7eb;border-radius:12px;padding:14px;min-height:240px}
+  .viewer .vh{margin:0 0 10px}
+  .viewer .vmeta{color:#6b7280;margin:0 0 12px}
+  .viewer .body{line-height:1.55;word-break:break-word}
   .card{border:1px solid #e5e7eb;border-radius:12px;padding:14px}
   .sub{color:#111;font-weight:600;margin:0 0 6px}
   .from{color:#374151;font-size:0.95rem;margin:0 0 4px}
@@ -26,7 +31,14 @@
     <span class="muted">자동 새로고침: <?=$cfg['poll_interval']?>초</span>
   </div>
   <div class="meta">최근 메일을 불러옵니다…</div>
-  <div id="list" class="list"></div>
+  <div class="wrap">
+    <div id="list" class="list"></div>
+    <div id="viewer" class="viewer">
+      <h2 class="vh">메일 내용 보기</h2>
+      <div class="vmeta">왼쪽 목록에서 메일을 클릭하세요.</div>
+      <div class="body muted">선택된 메일이 없습니다.</div>
+    </div>
+  </div>
 
 <script>
 const list = document.getElementById('list');
@@ -57,6 +69,7 @@ async function load() {
         <div class="date">${escapeHtml(m.date || '')}</div>
         <div class="snippet">${escapeHtml(m.snippet || '')}</div>
       `;
+      card.addEventListener('click', () => openMessage(m.uid, card));
       list.appendChild(card);
     }
   } catch (e) {
@@ -68,6 +81,31 @@ function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<
 
 load();
 setInterval(load, interval);
+
+async function openMessage(uid, cardEl){
+  const viewer = document.getElementById('viewer');
+  viewer.querySelector('.vmeta').textContent = '로딩 중…';
+  viewer.querySelector('.body').innerHTML = '';
+  try{
+    const res = await fetch('view_mail.php?uid=' + encodeURIComponent(uid), {cache:'no-store'});
+    const data = await res.json();
+    if(!data.ok) throw new Error(data.error || 'unknown error');
+    const m = data.message;
+    viewer.innerHTML = `
+      <h2 class="vh">${escapeHtml(m.subject)}</h2>
+      <div class="vmeta">From: ${escapeHtml(m.from || '')} · ${escapeHtml(m.date || '')}</div>
+      <div class="body">${m.body_html || ''}</div>
+    `;
+    // Mark visually as read
+    if(cardEl){
+      const badge = cardEl.querySelector('.badge');
+      if (badge) badge.remove();
+    }
+  }catch(e){
+    viewer.querySelector('.vmeta').textContent = '오류: ' + e.message;
+  }
+}
+
 </script>
 </body>
 </html>

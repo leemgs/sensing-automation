@@ -84,3 +84,54 @@ function to_utf8($text, $encodingCode)
         default:         return $text;
     }
 }
+
+/**
+ * get_body_html_or_text
+ * - 가능하면 text/html을 반환(스크립트 제거), 없으면 text/plain을 <br> 변환하여 HTML로 반환
+ */
+function get_body_html_or_text($imap, $msgno) {
+    $structure = imap_fetchstructure($imap, $msgno);
+
+    $strip_scripts = function($html) {
+        // Remove <script>...</script>
+        $html = preg_replace('#<\s*script[^>]*>.*?<\s*/\s*script\s*>#is', '', $html);
+        // Remove event handlers like onclick=, onload= etc.
+        $html = preg_replace('/\son\w+\s*=\s*"[^"]*"/i', '', $html);
+        $html = preg_replace("/\son\w+\s*=\s*'[^']*'/i", '', $html);
+        $html = preg_replace('/\son\w+\s*=\s*[^\s>]+/i', '', $html);
+        return $html;
+    };
+
+    if (!isset($structure->parts)) {
+        $raw = imap_body($imap, $msgno);
+        $decoded = to_utf8($raw, $structure->encoding ?? 0);
+        // We don't know the subtype, provide safe-ish HTML
+        return nl2br(htmlentities($decoded, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+    }
+
+    $plainPartNo = null;
+    $htmlPartNo  = null;
+    foreach ($structure->parts as $i => $part) {
+        $mime = strtolower($part->subtype ?? '');
+        $type = $part->type ?? 0;
+        if ($type === TYPETEXT && $mime === 'plain')  $plainPartNo = $i + 1;
+        if ($type === TYPETEXT && $mime === 'html')   $htmlPartNo  = $i + 1;
+    }
+
+    if ($htmlPartNo !== null) {
+        $b = imap_fetchbody($imap, $msgno, $htmlPartNo);
+        $b = to_utf8($b, $structure->parts[$htmlPartNo - 1]->encoding ?? 0);
+        return $strip_scripts($b);
+    }
+
+    // Fallback to text/plain
+    if ($plainPartNo !== null) {
+        $b = imap_fetchbody($imap, $msgno, $plainPartNo);
+        $b = to_utf8($b, $structure->parts[$plainPartNo - 1]->encoding ?? 0);
+        return nl2br(htmlentities($b, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+    }
+
+    $raw = imap_body($imap, $msgno);
+    $decoded = to_utf8($raw, $structure->encoding ?? 0);
+    return nl2br(htmlentities($decoded, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+}
