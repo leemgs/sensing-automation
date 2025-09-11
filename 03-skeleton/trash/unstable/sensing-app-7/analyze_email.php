@@ -1,0 +1,137 @@
+<?php
+// analyze_email.php
+require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/lib/functions.php';
+require_once __DIR__ . '/lib/article_fetch.php';
+require_once __DIR__ . '/lib/llm.php';
+require_once __DIR__ . '/templates/html_templates.php';
+require_once __DIR__ . '/lib/schema.php';
+require_once __DIR__ . '/lib/similarity.php';
+require_once __DIR__ . '/lib/db.php';
+require_once __DIR__ . '/lib/notify.php';
+
+$urls = $_POST['urls'] ?? [];
+
+db_init(); $pdo = db();
+$sim_jaccard_min = floatval(getenv('SENSING_SIMILARITY_JACCARD_MIN') ?: 0.90);
+
+if (!$urls || !is_array($urls)) {
+    die('<p>선택된 링크가 없습니다. <a href="index.php">돌아가기</a></p>');
+}
+
+$results = [];
+foreach ($urls as $url) {
+    $url = trim($url);
+    if ($url === '') continue;
+
+    try {
+        $text = fetch_url_text($url);
+        $title = $url;
+        if (!$text) {
+            // 수집 실패 시 최소 텍스트로라도 분석
+            $text = '수집 실패로 인해 본문을 가져오지 못했습니다. URL과 앵커 텍스트를 기반으로 분석해주세요.';
+        }
+        $parsed = llm_analyze_article($title, $url, $text);
+        $confidence = floatval($parsed['confidence'] ?? 0.6);
+        $needs_review = !empty($parsed['needs_review']);
+        if (!empty($parsed['review_reasons'])) { $review_notes = implode('; ', (array)$parsed['review_reasons']); } else { $review_notes = ''; }
+
+        $valNotes=[]; $v1=true; $v2=true;
+        if (isset($parsed['regulation'])) $v1 = validate_regulation($parsed['regulation'], $valNotes);
+        if (isset($parsed['asset'])) $v2 = validate_asset($parsed['asset'], $valNotes);
+        if (!$v1 || !$v2) { $needs_review = true; $review_notes .= ($review_notes?'; ':'') . implode('; ', $valNotes); }
+
+        // 저장 전 유사도 검사 (최근 500건 대상)
+        $sig = text_signature($text ?: $url);
+        $rowsS = $pdo->query("SELECT url, text_sig FROM results ORDER BY id DESC LIMIT 500")->fetchAll();
+        foreach ($rowsS as $rr) {
+            if (!empty($rr['text_sig']) && $sig && $rr['text_sig']!==$sig) {
+                $sim = jaccard3($text ?: $url, $rr['url']);
+                if ($sim >= $sim_jaccard_min) {
+                    // 거의 동일: 스킵 처리
+                    $results[] = ['url'=>$url, 'saved'=>[], 'ok'=>true, 'error'=>null];
+                    continue 2;
+                }
+            }
+        }
+
+        // 저장: regulation
+        $reg = $parsed['regulation'] ?? null;
+        $asset = $parsed['asset'] ?? null;
+
+        $saved = [];
+        if (is_array($reg) && isset($reg['category'])) {
+            $cat = $reg['category'];
+            if (!in_array($cat, ['governance','contract','lawsuit'], true)) $cat = 'governance';
+            $html = render_regulation_html($reg);
+            [$ok, $path] = save_html_file($SENSING_BASE, 'regulation', $cat, $html, $url);
+            $saved['regulation'] = $ok ? $path : null;
+        }
+        if (is_array($asset) && isset($asset['category'])) {
+            $cat = $asset['category'];
+            if (!in_array($cat, ['data','model','agent'], true)) $cat = 'agent';
+            $html = render_asset_html($asset);
+            [$ok, $path] = save_html_file($SENSING_BASE, 'asset', $cat, $html, $url);
+            $saved['asset'] = $ok ? $path : null;
+        }
+        $results[] = ['url'=>$url, 'saved'=>$saved, 'ok'=>true, 'error'=>null];
+        // record
+        $st = $pdo->prepare('INSERT INTO results(created_at,email_uid,subject,from_addr,url,url_hash,regulation_category,asset_category,regulation_path,asset_path,status,confidence,needs_review,review_notes,severity,source_type,text_sig) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,"email",?)');
+        $sig = text_signature($text ?: $url);
+        $sev = (isset($reg['category']) && $reg['category']==='lawsuit') ? 'high' : 'info';
+        $st->execute([date('Y-m-d H:i:s'), null, $title, null, $url, substr(sha1($url),0,16), $reg['category'] ?? null, $asset['category'] ?? null, $saved['regulation'] ?? null, $saved['asset'] ?? null, 'success', $confidence, $needs_review?1:0, $review_notes, $sev, $sig]);
+        if ($needs_review) { post_webhook("검토 필요: $title", null, 'warn'); }
+
+    } catch (Throwable $e) {
+        log_msg($LOG_FILE, "Analyze error for $url : " . $e->getMessage());
+        $results[] = ['url'=>$url, 'saved'=>[], 'ok'=>false, 'error'=>$e->getMessage()];
+    }
+}
+?>
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>분석 결과</title>
+  <link rel="stylesheet" href="public/style.css">
+</head>
+<body>
+  <a class="btn" href="index.php">← 목록</a>
+  <h1>분석 결과</h1>
+
+  <table>
+    <thead><tr><th>#</th><th>URL</th><th>규제 파일</th><th>에셋 파일</th><th>상태</th></tr></thead>
+    <tbody>
+      <?php foreach ($results as $i => $r): ?>
+        <tr>
+          <td><?= $i+1 ?></td>
+          <td><a target="_blank" href="<?= htmlspecialchars($r['url']) ?>"><?= htmlspecialchars($r['url']) ?></a></td>
+          <td>
+            <?php if (!empty($r['saved']['regulation'])): ?>
+              <a target="_blank" href="<?= htmlspecialchars($r['saved']['regulation']) ?>"><?= htmlspecialchars(basename($r['saved']['regulation'])) ?></a>
+            <?php else: ?>
+              <em>-</em>
+            <?php endif; ?>
+          </td>
+          <td>
+            <?php if (!empty($r['saved']['asset'])): ?>
+              <a target="_blank" href="<?= htmlspecialchars($r['saved']['asset']) ?>"><?= htmlspecialchars(basename($r['saved']['asset'])) ?></a>
+            <?php else: ?>
+              <em>-</em>
+            <?php endif; ?>
+          </td>
+          <td>
+            <?php if ($r['ok']): ?>
+              ✅ 성공
+            <?php else: ?>
+              ❌ 실패: <?= htmlspecialchars($r['error']) ?>
+            <?php endif; ?>
+          </td>
+        </tr>
+      <?php endforeach; ?>
+    </tbody>
+  </table>
+
+  <p><small>저장 경로는 권한 상황에 따라 <code>/var/www/html/sensing</code> 또는 <code>./sensing_out</code>입니다.</small></p>
+</body>
+</html>

@@ -1,0 +1,1 @@
+v12 with numbered pagination + first/last buttons + header API info hidden

@@ -49,11 +49,11 @@ $ENV = loadEnvArray(__DIR__.'/.env');
 
 $CFG = [
     // DB
-    'db_host'   => env_val($ENV, 'DB_HOST', '127.0.0.1'),
+    'db_host'   => env_val($ENV, 'DB_HOST', 'leemgs.mooo.com'),
     'db_port'   => env_int($ENV, 'DB_PORT', 3306),
     'db_name'   => env_val($ENV, 'DB_NAME', 'regulation'),
-    'db_user'   => env_val($ENV, 'DB_USER', 'readonly_user'),
-    'db_pass'   => env_val($ENV, 'DB_PASS', 'readonly_password'),
+    'db_user'   => env_val($ENV, 'DB_USER', 'root'),
+    'db_pass'   => env_val($ENV, 'DB_PASS', 'ekqlscl98'),
     'charset'   => env_val($ENV, 'DB_CHARSET', 'utf8mb4'),
 
     // OpenRouter (Chat Completions)
@@ -100,7 +100,7 @@ $CFG['log_file']            = $CFG['log_dir_effective'] . '/queries.log';
 $CFG['schema_cache_file']   = $CFG['schema_cache_dir_effective'] . '/schema.json';
 
 /* ---------- last-resort defaults (belt & suspenders) ---------- */
-$CFG['db_host']  = $CFG['db_host']  ?: '127.0.0.1';
+$CFG['db_host']  = $CFG['db_host']  ?: 'leemgs.mooo.com';
 $CFG['db_name']  = $CFG['db_name']  ?: 'regulation';
 $CFG['or_model'] = $CFG['or_model'] ?: 'openai/gpt-4o-mini';
 

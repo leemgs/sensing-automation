@@ -1,0 +1,1522 @@
+{
+    "tables": [
+        {
+            "TABLE_NAME": "euaiact_article_recital_map",
+            "TABLE_COMMENT": "",
+            "TABLE_ROWS": 238
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "TABLE_COMMENT": "",
+            "TABLE_ROWS": 130
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "TABLE_COMMENT": "",
+            "TABLE_ROWS": 78
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "TABLE_COMMENT": "",
+            "TABLE_ROWS": 60
+        },
+        {
+            "TABLE_NAME": "euaiact_annex_recital_map",
+            "TABLE_COMMENT": "",
+            "TABLE_ROWS": 51
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-main",
+            "TABLE_COMMENT": "",
+            "TABLE_ROWS": 43
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-supplementary",
+            "TABLE_COMMENT": "",
+            "TABLE_ROWS": 3
+        },
+        {
+            "TABLE_NAME": "euaiact_recital_article_map",
+            "TABLE_COMMENT": "",
+            "TABLE_ROWS": 0
+        }
+    ],
+    "columns": [
+        {
+            "TABLE_NAME": "ai-basic-act-main",
+            "COLUMN_NAME": "no",
+            "COLUMN_TYPE": "int(10) unsigned",
+            "IS_NULLABLE": "NO",
+            "COLUMN_DEFAULT": null,
+            "COLUMN_KEY": "PRI",
+            "EXTRA": "auto_increment",
+            "ORDINAL_POSITION": 1
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-main",
+            "COLUMN_NAME": "chapter_no",
+            "COLUMN_TYPE": "varchar(128)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "MUL",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 2
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-main",
+            "COLUMN_NAME": "chapter_title",
+            "COLUMN_TYPE": "varchar(255)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 3
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-main",
+            "COLUMN_NAME": "section_no",
+            "COLUMN_TYPE": "varchar(128)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 4
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-main",
+            "COLUMN_NAME": "section_title",
+            "COLUMN_TYPE": "varchar(255)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 5
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-main",
+            "COLUMN_NAME": "article_no",
+            "COLUMN_TYPE": "varchar(128)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 6
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-main",
+            "COLUMN_NAME": "article_title",
+            "COLUMN_TYPE": "varchar(255)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 7
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-main",
+            "COLUMN_NAME": "text_ko",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 8
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-main",
+            "COLUMN_NAME": "source_link",
+            "COLUMN_TYPE": "varchar(1024)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 9
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-main",
+            "COLUMN_NAME": "why_related_when",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 10
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-main",
+            "COLUMN_NAME": "why_not_related",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 11
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-main",
+            "COLUMN_NAME": "quantitative_items",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 12
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-main",
+            "COLUMN_NAME": "qualitative_items",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 13
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-main",
+            "COLUMN_NAME": "considerations",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 14
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-main",
+            "COLUMN_NAME": "key_components",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 15
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-supplementary",
+            "COLUMN_NAME": "no",
+            "COLUMN_TYPE": "int(10) unsigned",
+            "IS_NULLABLE": "NO",
+            "COLUMN_DEFAULT": null,
+            "COLUMN_KEY": "PRI",
+            "EXTRA": "auto_increment",
+            "ORDINAL_POSITION": 1
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-supplementary",
+            "COLUMN_NAME": "chapter_no",
+            "COLUMN_TYPE": "varchar(128)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "MUL",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 2
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-supplementary",
+            "COLUMN_NAME": "chapter_title",
+            "COLUMN_TYPE": "varchar(255)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 3
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-supplementary",
+            "COLUMN_NAME": "section_no",
+            "COLUMN_TYPE": "varchar(128)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 4
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-supplementary",
+            "COLUMN_NAME": "section_title",
+            "COLUMN_TYPE": "varchar(255)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 5
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-supplementary",
+            "COLUMN_NAME": "article_no",
+            "COLUMN_TYPE": "varchar(128)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 6
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-supplementary",
+            "COLUMN_NAME": "article_title",
+            "COLUMN_TYPE": "varchar(255)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 7
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-supplementary",
+            "COLUMN_NAME": "source_link",
+            "COLUMN_TYPE": "varchar(1024)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 8
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-supplementary",
+            "COLUMN_NAME": "text_ko",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 9
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-supplementary",
+            "COLUMN_NAME": "effective_date",
+            "COLUMN_TYPE": "varchar(10)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 10
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-supplementary",
+            "COLUMN_NAME": "why_related_when",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 11
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-supplementary",
+            "COLUMN_NAME": "why_not_related",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 12
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "no",
+            "COLUMN_TYPE": "int(10) unsigned",
+            "IS_NULLABLE": "NO",
+            "COLUMN_DEFAULT": null,
+            "COLUMN_KEY": "PRI",
+            "EXTRA": "auto_increment",
+            "ORDINAL_POSITION": 1
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "annex_no",
+            "COLUMN_TYPE": "varchar(128)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 2
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "annex_title",
+            "COLUMN_TYPE": "varchar(255)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 3
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "section_no",
+            "COLUMN_TYPE": "varchar(128)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 4
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "section_title",
+            "COLUMN_TYPE": "varchar(255)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 5
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "related_recital_no",
+            "COLUMN_TYPE": "varchar(128)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 6
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "link",
+            "COLUMN_TYPE": "varchar(1024)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 7
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "summary_en",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 8
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "text_en",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 9
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "summary_ko",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 10
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "text_ko",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 11
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "why_related_when",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 12
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "why_not_related",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 13
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "unacceptable_risk",
+            "COLUMN_TYPE": "enum('O','X')",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 14
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "high_risk",
+            "COLUMN_TYPE": "enum('O','X')",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 15
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "limited_risk",
+            "COLUMN_TYPE": "enum('O','X')",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 16
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "minimal_risk",
+            "COLUMN_TYPE": "enum('O','X')",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 17
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "reason",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 18
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "phase_1_1_problem_planning",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 19
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "phase_1_2_data_collection_preprocessing",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 20
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "phase_1_3_model_service_adoption",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 21
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "phase_1_4_model_design_train_opt",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 22
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "phase_1_5_validation_redteam",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 23
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "phase_1_6_deploy_monitor",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 24
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "phase_1_7_ops_perf_eval",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 25
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "phase_2_1_planning",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 26
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "phase_2_2_plan",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 27
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "phase_2_3_external_model_adoption",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 28
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "phase_2_4_ai_feature_dev",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 29
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "phase_2_5_eval_validation",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 30
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "phase_2_6_release_deploy",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 31
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "phase_2_7_monitor_maintain",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 32
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "reason_number",
+            "COLUMN_TYPE": "varchar(128)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 33
+        },
+        {
+            "TABLE_NAME": "euaiact-annex",
+            "COLUMN_NAME": "reason_description",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 34
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "no",
+            "COLUMN_TYPE": "int(10) unsigned",
+            "IS_NULLABLE": "NO",
+            "COLUMN_DEFAULT": null,
+            "COLUMN_KEY": "PRI",
+            "EXTRA": "auto_increment",
+            "ORDINAL_POSITION": 1
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "chapter_no",
+            "COLUMN_TYPE": "varchar(128)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 2
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "chapter_name",
+            "COLUMN_TYPE": "varchar(255)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 3
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "section_no",
+            "COLUMN_TYPE": "varchar(128)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 4
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "section_name",
+            "COLUMN_TYPE": "varchar(255)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 5
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "article_name",
+            "COLUMN_TYPE": "varchar(255)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "UNI",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 6
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "summary_en",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 7
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "text_en",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 8
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "summary_ko",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 9
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "text_ko",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 10
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "suitable_recitals",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 11
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "according_to",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 12
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "basis_note",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 13
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "source_link",
+            "COLUMN_TYPE": "varchar(1024)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 14
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "why_related_when",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 15
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "why_not_related",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 16
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "quantitative_items",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 17
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "qualitative_items",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 18
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "considerations",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 19
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "key_components",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 20
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "unacceptable_risk",
+            "COLUMN_TYPE": "enum('O','X')",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 21
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "high_risk",
+            "COLUMN_TYPE": "enum('O','X')",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 22
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "limited_risk",
+            "COLUMN_TYPE": "enum('O','X')",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 23
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "minimal_risk",
+            "COLUMN_TYPE": "enum('O','X')",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 24
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "reason",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 25
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "phase_1_1_problem_planning",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 26
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "phase_1_2_data_collection_preprocessing",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 27
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "phase_1_3_model_service_adoption",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 28
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "phase_1_4_model_design_train_opt",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 29
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "phase_1_5_validation_redteam",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 30
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "phase_1_6_deploy_monitor",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 31
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "phase_1_7_ops_perf_eval",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 32
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "phase_2_1_planning",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 33
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "phase_2_2_plan",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 34
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "phase_2_3_external_model_adoption",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 35
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "phase_2_4_ai_feature_dev",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 36
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "phase_2_5_eval_validation",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 37
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "phase_2_6_release_deploy",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 38
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "phase_2_7_monitor_maintain",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 39
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "reason_number",
+            "COLUMN_TYPE": "varchar(128)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 40
+        },
+        {
+            "TABLE_NAME": "euaiact-ariticles",
+            "COLUMN_NAME": "reason_description",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 41
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "no",
+            "COLUMN_TYPE": "int(10) unsigned",
+            "IS_NULLABLE": "NO",
+            "COLUMN_DEFAULT": null,
+            "COLUMN_KEY": "PRI",
+            "EXTRA": "auto_increment",
+            "ORDINAL_POSITION": 1
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "recital_no",
+            "COLUMN_TYPE": "varchar(128)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "UNI",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 2
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "text_en",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 3
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "text_ko",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 4
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "related_article",
+            "COLUMN_TYPE": "varchar(255)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 5
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "related_annex",
+            "COLUMN_TYPE": "varchar(255)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 6
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "source_link",
+            "COLUMN_TYPE": "varchar(1024)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 7
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "why_related_when",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 8
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "why_not_related",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 9
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "unacceptable_risk",
+            "COLUMN_TYPE": "enum('O','X')",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 10
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "high_risk",
+            "COLUMN_TYPE": "enum('O','X')",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 11
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "limited_risk",
+            "COLUMN_TYPE": "enum('O','X')",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 12
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "minimal_risk",
+            "COLUMN_TYPE": "enum('O','X')",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 13
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "reason",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 14
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "phase_1_1_problem_planning",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 15
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "phase_1_2_data_collection_preprocessing",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 16
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "phase_1_3_model_service_adoption",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 17
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "phase_1_4_model_design_train_opt",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 18
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "phase_1_5_validation_redteam",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 19
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "phase_1_6_deploy_monitor",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 20
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "phase_1_7_ops_perf_eval",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 21
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "phase_2_1_planning",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 22
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "phase_2_2_plan",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 23
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "phase_2_3_external_model_adoption",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 24
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "phase_2_4_ai_feature_dev",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 25
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "phase_2_5_eval_validation",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 26
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "phase_2_6_release_deploy",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 27
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "phase_2_7_monitor_maintain",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 28
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "reason_number",
+            "COLUMN_TYPE": "varchar(128)",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 29
+        },
+        {
+            "TABLE_NAME": "euaiact-recitals",
+            "COLUMN_NAME": "reason_description",
+            "COLUMN_TYPE": "longtext",
+            "IS_NULLABLE": "YES",
+            "COLUMN_DEFAULT": "NULL",
+            "COLUMN_KEY": "",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 30
+        },
+        {
+            "TABLE_NAME": "euaiact_annex_recital_map",
+            "COLUMN_NAME": "id",
+            "COLUMN_TYPE": "int(10) unsigned",
+            "IS_NULLABLE": "NO",
+            "COLUMN_DEFAULT": null,
+            "COLUMN_KEY": "PRI",
+            "EXTRA": "auto_increment",
+            "ORDINAL_POSITION": 1
+        },
+        {
+            "TABLE_NAME": "euaiact_annex_recital_map",
+            "COLUMN_NAME": "annex_id",
+            "COLUMN_TYPE": "int(10) unsigned",
+            "IS_NULLABLE": "NO",
+            "COLUMN_DEFAULT": null,
+            "COLUMN_KEY": "MUL",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 2
+        },
+        {
+            "TABLE_NAME": "euaiact_annex_recital_map",
+            "COLUMN_NAME": "recital_id",
+            "COLUMN_TYPE": "int(10) unsigned",
+            "IS_NULLABLE": "NO",
+            "COLUMN_DEFAULT": null,
+            "COLUMN_KEY": "MUL",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 3
+        },
+        {
+            "TABLE_NAME": "euaiact_article_recital_map",
+            "COLUMN_NAME": "id",
+            "COLUMN_TYPE": "int(10) unsigned",
+            "IS_NULLABLE": "NO",
+            "COLUMN_DEFAULT": null,
+            "COLUMN_KEY": "PRI",
+            "EXTRA": "auto_increment",
+            "ORDINAL_POSITION": 1
+        },
+        {
+            "TABLE_NAME": "euaiact_article_recital_map",
+            "COLUMN_NAME": "article_id",
+            "COLUMN_TYPE": "int(10) unsigned",
+            "IS_NULLABLE": "NO",
+            "COLUMN_DEFAULT": null,
+            "COLUMN_KEY": "MUL",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 2
+        },
+        {
+            "TABLE_NAME": "euaiact_article_recital_map",
+            "COLUMN_NAME": "recital_id",
+            "COLUMN_TYPE": "int(10) unsigned",
+            "IS_NULLABLE": "NO",
+            "COLUMN_DEFAULT": null,
+            "COLUMN_KEY": "MUL",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 3
+        },
+        {
+            "TABLE_NAME": "euaiact_recital_article_map",
+            "COLUMN_NAME": "id",
+            "COLUMN_TYPE": "int(10) unsigned",
+            "IS_NULLABLE": "NO",
+            "COLUMN_DEFAULT": null,
+            "COLUMN_KEY": "PRI",
+            "EXTRA": "auto_increment",
+            "ORDINAL_POSITION": 1
+        },
+        {
+            "TABLE_NAME": "euaiact_recital_article_map",
+            "COLUMN_NAME": "recital_id",
+            "COLUMN_TYPE": "int(10) unsigned",
+            "IS_NULLABLE": "NO",
+            "COLUMN_DEFAULT": null,
+            "COLUMN_KEY": "MUL",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 2
+        },
+        {
+            "TABLE_NAME": "euaiact_recital_article_map",
+            "COLUMN_NAME": "article_id",
+            "COLUMN_TYPE": "int(10) unsigned",
+            "IS_NULLABLE": "NO",
+            "COLUMN_DEFAULT": null,
+            "COLUMN_KEY": "MUL",
+            "EXTRA": "",
+            "ORDINAL_POSITION": 3
+        }
+    ],
+    "fks": [
+        {
+            "TABLE_NAME": "ai-basic-act-supplementary",
+            "COLUMN_NAME": "article_no",
+            "CONSTRAINT_NAME": "fk_sup_to_main",
+            "REFERENCED_TABLE_NAME": "ai-basic-act-main",
+            "REFERENCED_COLUMN_NAME": "article_no"
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-supplementary",
+            "COLUMN_NAME": "chapter_no",
+            "CONSTRAINT_NAME": "fk_sup_to_main",
+            "REFERENCED_TABLE_NAME": "ai-basic-act-main",
+            "REFERENCED_COLUMN_NAME": "chapter_no"
+        },
+        {
+            "TABLE_NAME": "ai-basic-act-supplementary",
+            "COLUMN_NAME": "section_no",
+            "CONSTRAINT_NAME": "fk_sup_to_main",
+            "REFERENCED_TABLE_NAME": "ai-basic-act-main",
+            "REFERENCED_COLUMN_NAME": "section_no"
+        },
+        {
+            "TABLE_NAME": "euaiact_annex_recital_map",
+            "COLUMN_NAME": "annex_id",
+            "CONSTRAINT_NAME": "fk_map_annex",
+            "REFERENCED_TABLE_NAME": "euaiact-annex",
+            "REFERENCED_COLUMN_NAME": "no"
+        },
+        {
+            "TABLE_NAME": "euaiact_annex_recital_map",
+            "COLUMN_NAME": "recital_id",
+            "CONSTRAINT_NAME": "fk_map_recital2",
+            "REFERENCED_TABLE_NAME": "euaiact-recitals",
+            "REFERENCED_COLUMN_NAME": "no"
+        },
+        {
+            "TABLE_NAME": "euaiact_article_recital_map",
+            "COLUMN_NAME": "article_id",
+            "CONSTRAINT_NAME": "fk_map_article",
+            "REFERENCED_TABLE_NAME": "euaiact-ariticles",
+            "REFERENCED_COLUMN_NAME": "no"
+        },
+        {
+            "TABLE_NAME": "euaiact_article_recital_map",
+            "COLUMN_NAME": "recital_id",
+            "CONSTRAINT_NAME": "fk_map_recital",
+            "REFERENCED_TABLE_NAME": "euaiact-recitals",
+            "REFERENCED_COLUMN_NAME": "no"
+        },
+        {
+            "TABLE_NAME": "euaiact_recital_article_map",
+            "COLUMN_NAME": "article_id",
+            "CONSTRAINT_NAME": "fk_ra_article",
+            "REFERENCED_TABLE_NAME": "euaiact-ariticles",
+            "REFERENCED_COLUMN_NAME": "no"
+        },
+        {
+            "TABLE_NAME": "euaiact_recital_article_map",
+            "COLUMN_NAME": "recital_id",
+            "CONSTRAINT_NAME": "fk_ra_recital",
+            "REFERENCED_TABLE_NAME": "euaiact-recitals",
+            "REFERENCED_COLUMN_NAME": "no"
+        }
+    ],
+    "samples": []
+}

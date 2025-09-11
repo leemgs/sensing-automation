@@ -23,16 +23,16 @@ $CFG = [
     'db_host'   => '127.0.0.1',
     'db_port'   => 3306,
     'db_name'   => 'regulation',
-    'db_user'   => 'readonly_user',
-    'db_pass'   => 'readonly_password',
+    'db_user'   => 'root',
+    'db_pass'   => 'ekqlscl98',
     'charset'   => 'utf8mb4',
 
     // OpenRouter (Chat Completions)
-    'or_api_key'      => 'PUT_YOUR_OPENROUTER_API_KEY_HERE',
+    'or_api_key'      => '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',
     'or_model'        => 'openai/gpt-4o-mini',
     'or_endpoint'     => 'https://openrouter.ai/api/v1/chat/completions',
     'or_temperature'  => 0.1,
-    'or_max_tokens'   => 800,
+    'or_max_tokens'   => 512,
     // optional meta headers
     'or_referer'      => '',
     'or_title'        => 'NL→SQL App',
@@ -41,7 +41,7 @@ $CFG = [
     'max_schema_tables'   => 30,
     'sample_rows_per_tbl' => 0,
     'auto_limit_default'  => 200,
-    'execution_enabled'   => false,
+    'execution_enabled'   => true,
 
     // Paths (will be normalized to effective paths)
     'log_dir'             => '/var/log',
