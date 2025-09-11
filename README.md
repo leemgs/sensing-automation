@@ -1,55 +1,61 @@
-# 프로젝트 소개
 
-이 저장소는 **소프트웨어 개발**과 **실행 환경 개선**을 목적으로 한 프로젝트입니다.
-프로젝트의 유지보수 및 완성도를 높이기위하여 버전별로 점진적인 개선을 적용해가며, 문서와 코드가 함께 진화하는 과정을 담고 있습니다.
+# Project Introduction
 
----
-
-## 🎯 프로젝트 목표
-
-- 소프트웨어 개발 단계(Feasibility → Development → Deployment)에 맞춘 완성물 고도화
-- 요구사항과 프로젝트 요약을 정리하여 이해하기 쉬운 진입점 마련 
-- 지속적인 코드 리팩터링 및 버전 관리로 유지보수성 확보
-- 호환성/이식성을 위해 웹 애플리케이션 실행 환경에 필요한 설정과 구조 표준화
+This repository is a project aimed at **software development** and **execution environment improvement**.
+To enhance maintainability and completeness, progressive improvements are applied across versions, capturing the process in which both documentation and code evolve together.
 
 ---
 
-## ✨ 주요 특징
+## 🎯 Project Goals
 
-
-- **버전 관리**  
-  - 웹에서의 열람 편의를 위해 브랜치 대신에 `v01` ~ `v04`까지의 버전 폴더를 통해 프로젝트 진화 과정 보관  
-  - 각 버전은 전체 파일 업데이트, 요구사항 반영, 폴더 구조 개선 등을 포함  
-
-- **개발 환경 지원**  
-  - Docker 및 환경 변수 기반 실행 환경 준비  
-  - 향후 배포 자동화(CI/CD) 확장 가능성 고려  
+* Enhance deliverables in line with software development phases (Feasibility → Development → Deployment)
+* Provide an accessible entry point by organizing requirements and project summaries
+* Ensure maintainability through continuous code refactoring and version management
+* Standardize configurations and structures required for web application runtime to improve compatibility/portability
 
 ---
 
-## 📂 저장소 구조
+## ✨ Key Features
 
-- `doc/`  
-  - 소프트웨어 개발 단계 문서  
-- `v01/` ~ `v05/`  
-  - 버전별 프로젝트 코드 및 문서 아카이브  
-- `README.md`  
-  - 프로젝트 소개 및 실행 가이드
+* **Version Management**
 
----
+  * For convenient browsing on the web, the project evolution is archived in version folders `v01` to `v04` instead of branches
+  * Each version includes full file updates, requirements integration, and folder structure improvements
 
-## 🔭 앞으로의 방향
+* **Development Environment Support**
 
-- **코드 안정화 및 테스트 확장**  
-- **Docker/Kubernetes 기반 배포 지원**  
-- **CI/CD 파이프라인 구축**  
-- **사용자 가이드 및 개발자 문서 보강**  
+  * Preparation of execution environment using Docker and environment variables
+  * Consideration for future deployment automation (CI/CD) expansion
 
 ---
 
-## 📝 참고
+## 📂 Repository Structure
 
-- `doc` : 소프트웨어 개발 단계 관련 문서 업데이트  
-- `feasibility` : 프로젝트 적용 범위 조정 (예: Python 제외)  
-- `v01` ~ `v05` : 버전별 아카이브, 프로젝트 진화 과정 기록
+* `doc/`
 
+  * Documentation of software development stages
+* `v01/` \~ `v05/`
+
+  * Archived code and documentation by version
+* `README.md`
+
+  * Project introduction and execution guide
+
+---
+
+## 🔭 Future Directions
+
+* **Code stabilization and test expansion**
+* **Deployment support using Docker/Kubernetes**
+* **CI/CD pipeline setup**
+* **Enhancement of user guides and developer documentation**
+
+---
+
+## 📝 Notes
+
+* `doc`: Updates related to software development phases
+* `feasibility`: Adjustment of project scope (e.g., excluding Python)
+* `v01` \~ `v05`: Versioned archives documenting the project’s evolution
+
+---
