@@ -1,262 +1,127 @@
 <?php
-/**
- * llm-api-unified.php — One endpoint for Grok(xAI), OpenAI, OpenRouter
- * PHP 8.1+ / cURL
- *
- * ✅ 보안: /etc/environment 직접 파싱(파일 I/O) — getenv()/$_ENV/$_SERVER 미사용
- * ✅ 통합: provider별로 공통 인터페이스(messages/prompt)와 통일된 JSON 응답
- * ✅ 유연: model/temperature/max_tokens 오버라이드 가능
- * ✅ 안전: 민감값 로깅/노출 없음, 에러 메시지에서 토큰 제거
- *
- * POST fields:
- *   - provider: "openai" | "openrouter" | "grok"   (required)
- *   - messages: JSON array of {role, content}       (optional)
- *   - prompt  : string                              (optional; messages 없을 때 사용)
- *   - model, temperature, max_tokens                (optional overrides)
- */
+// .env 파일 로드
+$env = @parse_ini_file(__DIR__ . '/.env');
+$apiKey = $env["OPENROUTER_API_KEY"] ?? null;
 
-declare(strict_types=1);
-header('Content-Type: application/json; charset=UTF-8');
-mb_internal_encoding('UTF-8');
-
-/* -------------------- utils -------------------- */
-function jexit(int $code, array $payload): void {
-    http_response_code($code);
-    echo json_encode($payload, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+if (!$apiKey) {
+    http_response_code(500);
+    echo "<pre>❌ OPENROUTER_API_KEY 가 .env 파일에 설정되어 있지 않습니다.</pre>";
     exit;
 }
-function sanitize_err(string $s): string {
-    // API 키 모양 토큰/시크릿을 단순 마스킹(우연 노출 방지)
-    $s = preg_replace('/(sk-[a-z0-9]{8,}|xai-[A-Za-z0-9_\-]{16,}|gsk_[A-Za-z0-9_\-]{16,}|hf_[A-Za-z0-9_\-]{16,})/i', '***', $s);
-    $s = preg_replace('/(sk-or-[A-Za-z0-9_\-]{16,})/i', '***', $s);
-    return $s ?? 'error';
-}
-function read_post(string $key, ?string $default=null): ?string {
-    return array_key_exists($key, $_POST) ? (is_string($_POST[$key]) ? $_POST[$key] : $default) : $default;
-}
 
-/* -------------------- /etc/environment parser (no getenv) -------------------- */
-function loadEnvFile(string $path): array {
-    $env = [];
-    if (!is_readable($path)) return $env;
-    $raw = @file_get_contents($path);
-    if ($raw === false) return $env;
-    $lines = preg_split('/\r\n|\n|\r/', $raw);
-    foreach ($lines as $line) {
-        $t = trim($line);
-        if ($t === '' || $t[0] === '#') continue;
-
-        // strip inline comment outside quotes
-        $len = strlen($t);
-        $inS=false; $inD=false; $buf='';
-        for ($i=0;$i<$len;$i++){
-            $ch = $t[$i];
-            if ($ch==="'" && !$inD){ $inS=!$inS; $buf.=$ch; continue; }
-            if ($ch==='"' && !$inS){ $inD=!$inD; $buf.=$ch; continue; }
-            if ($ch==='#' && !$inS && !$inD) break;
-            $buf.=$ch;
-        }
-        if (!preg_match('/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/', $buf, $m)) continue;
-        $key = $m[1]; $val = trim($m[2]);
-
-        if ($val !== '' && (($val[0] === '"' && substr($val,-1)==='"') || ($val[0] === "'" && substr($val,-1)==="'"))) {
-            $q = $val[0];
-            $val = substr($val,1,-1);
-            if ($q === '"') {
-                $val = str_replace(['\\"','\\n','\\r','\\t','\\\\'], ['"',"\n","\r","\t",'\\'], $val);
-            }
-        }
-        $env[$key] = $val;
-    }
-    return $env;
-}
-function env_str(array $E, string $k, ?string $d=null): ?string {
-    return array_key_exists($k,$E) ? (string)$E[$k] : $d;
-}
-function env_int(array $E, string $k, int $d): int {
-    return (isset($E[$k]) && $E[$k] !== '') ? (int)$E[$k] : $d;
-}
-function env_float(array $E, string $k, float $d): float {
-    return (isset($E[$k]) && $E[$k] !== '') ? (float)$E[$k] : $d;
-}
-
-/* -------------------- load config -------------------- */
-$ENV = loadEnvFile('/etc/environment');
-
-$CFG = [
-    // OpenAI
-    'OPENAI_API_KEY' => env_str($ENV, 'OPENAI_API_KEY', ''),
-    'OPENAI_MODEL'   => env_str($ENV, 'OPENAI_MODEL', 'gpt-4o-mini'),
-    'OPENAI_ENDPOINT'=> env_str($ENV, 'OPENAI_ENDPOINT', 'https://api.openai.com/v1/chat/completions'),
-
-    // OpenRouter
-    'OPENROUTER_API_KEY'   => env_str($ENV, 'OPENROUTER_API_KEY', ''),
-    'OPENROUTER_MODEL'     => env_str($ENV, 'OPENROUTER_MODEL', 'openai/gpt-4o-mini'),
-    'OPENROUTER_ENDPOINT'  => env_str($ENV, 'OPENROUTER_ENDPOINT', 'https://openrouter.ai/api/v1/chat/completions'),
-    'OPENROUTER_REFERER'   => env_str($ENV, 'OPENROUTER_HTTP_REFERER', ''),
-    'OPENROUTER_X_TITLE'   => env_str($ENV, 'OPENROUTER_X_TITLE', 'Unified LLM Client'),
-
-    // Grok (xAI)
-    'XAI_API_KEY'    => env_str($ENV, 'XAI_API_KEY', env_str($ENV,'GROK_API_KEY','')),
-    'XAI_MODEL'      => env_str($ENV, 'XAI_MODEL', 'grok-2-latest'),
-    'XAI_ENDPOINT'   => env_str($ENV, 'XAI_ENDPOINT', 'https://api.x.ai/v1/chat/completions'),
-
-    // common defaults
-    'TEMPERATURE'    => env_float($ENV, 'LLM_TEMPERATURE', 0.2),
-    'MAX_TOKENS'     => env_int($ENV, 'LLM_MAX_TOKENS', 512),
+// -------------------------------
+// 1) 요청 페이로드 정의
+// -------------------------------
+$data = [
+    "model" => "openai/gpt-4o",
+    "messages" => [
+        ["role" => "system", "content" => "You are a helpful assistant."],
+        ["role" => "user", "content" => "2010년, 2020년, 2030년(미래)의 시대가 각각 기술적으로 어떤 큰 변화가 생기는지 테이블로 요약 정리하고 시사점을 작성하세요."]
+    ],
+    "max_tokens" => 512,
+    "temperature" => 0.7
 ];
 
-/* -------------------- normalize input -------------------- */
-$provider = strtolower(trim((string)(read_post('provider',''))));
-if (!in_array($provider, ['openai','openrouter','grok'], true)) {
-    jexit(400, ['error' => 'provider must be one of: openai | openrouter | grok']);
-}
+// 사용자 질문 텍스트 (웹 출력용)
+$userQuestion = $data["messages"][1]["content"] ?? "";
 
-$rawMessages = read_post('messages');
-$prompt      = read_post('prompt', '');
+// -------------------------------
+// 2) OpenRouter Chat Completions 호출
+// -------------------------------
+$ch = curl_init("https://openrouter.ai/api/v1/chat/completions");
+curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_POST => true,
+    CURLOPT_HTTPHEADER => [
+        "Content-Type: application/json",
+        "Authorization: Bearer " . $apiKey
+    ],
+    CURLOPT_POSTFIELDS => json_encode($data, JSON_UNESCAPED_UNICODE)
+]);
 
-$messages = null;
-if ($rawMessages) {
-    $decoded = json_decode($rawMessages, true);
-    if (!is_array($decoded)) jexit(400, ['error'=>'messages must be a JSON array']);
-    $messages = $decoded;
-} elseif (is_string($prompt) && $prompt !== '') {
-    $messages = [
-        ['role'=>'system', 'content'=>'You are a helpful assistant.'],
-        ['role'=>'user',   'content'=>$prompt],
-    ];
-} else {
-    jexit(400, ['error'=>'either messages (JSON) or prompt (string) is required']);
-}
-
-$model       = read_post('model');
-$temperature = read_post('temperature');
-$max_tokens  = read_post('max_tokens');
-
-$temperature = is_null($temperature) ? $CFG['TEMPERATURE'] : (float)$temperature;
-$max_tokens  = is_null($max_tokens)  ? $CFG['MAX_TOKENS']  : (int)$max_tokens;
-
-/* -------------------- providers -------------------- */
-function call_openai(array $CFG, array $messages, ?string $overrideModel, float $temperature, int $maxTokens): array {
-    $key = $CFG['OPENAI_API_KEY'];
-    if (!$key) jexit(400, ['error'=>'OPENAI_API_KEY is not set in /etc/environment']);
-    $endpoint = $CFG['OPENAI_ENDPOINT'];
-    $model    = $overrideModel ?: $CFG['OPENAI_MODEL'];
-
-    $payload = [
-        'model'       => $model,
-        'messages'    => $messages,
-        'temperature' => $temperature,
-        'max_tokens'  => $maxTokens,
-    ];
-
-    $headers = [
-        'Authorization: Bearer '.$key,
-        'Content-Type: application/json',
-    ];
-
-    $res = http_json_post($endpoint, $headers, $payload, 90);
-    return normalize_openai_like('openai', $model, $res);
-}
-
-function call_openrouter(array $CFG, array $messages, ?string $overrideModel, float $temperature, int $maxTokens): array {
-    $key = $CFG['OPENROUTER_API_KEY'];
-    if (!$key) jexit(400, ['error'=>'OPENROUTER_API_KEY is not set in /etc/environment']);
-    $endpoint = $CFG['OPENROUTER_ENDPOINT'];
-    $model    = $overrideModel ?: $CFG['OPENROUTER_MODEL'];
-
-    $payload = [
-        'model'       => $model,
-        'messages'    => $messages,
-        'temperature' => $temperature,
-        'max_tokens'  => $maxTokens,
-    ];
-
-    $headers = [
-        'Authorization: Bearer '.$key,
-        'Content-Type: application/json',
-    ];
-    if (!empty($CFG['OPENROUTER_REFERER'])) $headers[] = 'Referer: '.$CFG['OPENROUTER_REFERER'];
-    if (!empty($CFG['OPENROUTER_REFERER'])) $headers[] = 'HTTP-Referer: '.$CFG['OPENROUTER_REFERER'];
-    if (!empty($CFG['OPENROUTER_X_TITLE'])) $headers[] = 'X-Title: '.$CFG['OPENROUTER_X_TITLE'];
-
-    $res = http_json_post($endpoint, $headers, $payload, 90);
-    return normalize_openai_like('openrouter', $model, $res);
-}
-
-function call_grok(array $CFG, array $messages, ?string $overrideModel, float $temperature, int $maxTokens): array {
-    $key = $CFG['XAI_API_KEY'];
-    if (!$key) jexit(400, ['error'=>'XAI_API_KEY (or GROK_API_KEY) is not set in /etc/environment']);
-    $endpoint = $CFG['XAI_ENDPOINT']; // xAI는 OpenAI 호환 /v1/chat/completions
-    $model    = $overrideModel ?: $CFG['XAI_MODEL'];
-
-    $payload = [
-        'model'       => $model,
-        'messages'    => $messages,
-        'temperature' => $temperature,
-        'max_tokens'  => $maxTokens,
-    ];
-
-    $headers = [
-        'Authorization: Bearer '.$key,
-        'Content-Type: application/json',
-    ];
-
-    $res = http_json_post($endpoint, $headers, $payload, 90);
-    return normalize_openai_like('grok', $model, $res);
-}
-
-/* -------------------- HTTP helper -------------------- */
-function http_json_post(string $url, array $headers, array $payload, int $timeoutSec=60): array {
-    $ch = curl_init();
-    curl_setopt_array($ch, [
-        CURLOPT_URL            => $url,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_POST           => true,
-        CURLOPT_HTTPHEADER     => $headers,
-        CURLOPT_POSTFIELDS     => json_encode($payload, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES),
-        CURLOPT_TIMEOUT        => $timeoutSec,
-    ]);
-    $resp = curl_exec($ch);
-    $err  = curl_error($ch);
-    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$response = curl_exec($ch);
+if ($response === false) {
+    $err = curl_error($ch);
     curl_close($ch);
+    http_response_code(502);
+    echo "<pre>cURL Error: " . htmlspecialchars($err, ENT_QUOTES, 'UTF-8') . "</pre>";
+    exit;
+}
+curl_close($ch);
 
-    if ($err) jexit(502, ['error'=>'cURL error', 'detail'=>sanitize_err($err)]);
-    if ($code < 200 || $code >= 300) {
-        $snippet = is_string($resp) ? mb_substr($resp,0,600) : '';
-        jexit($code, ['error'=>'HTTP error', 'status'=>$code, 'detail'=>sanitize_err($snippet)]);
-    }
+// -------------------------------
+// 3) 응답 파싱
+// -------------------------------
+$result = json_decode($response, true);
+$answer = $result['choices'][0]['message']['content'] ?? "응답 없음";
 
-    $json = json_decode((string)$resp, true);
-    if (!is_array($json)) jexit(500, ['error'=>'Invalid JSON from upstream']);
-    return $json;
+// -------------------------------
+// 4) 출력 (CLI vs Web)
+// -------------------------------
+if (php_sapi_name() === 'cli') {
+    echo "🤖 모델 응답 (CLI)\n";
+    echo "Question (by User):\n" . $userQuestion . "\n\n";
+    echo "Answer (by LLM):\n" . $answer . "\n";
+    exit;
 }
 
-/* -------------------- normalize (OpenAI-style) -------------------- */
-function normalize_openai_like(string $provider, string $model, array $raw): array {
-    $choice = $raw['choices'][0]['message']['content'] ?? null;
-    $usage  = $raw['usage'] ?? null;
-    return [
-        'provider' => $provider,
-        'model'    => $raw['model'] ?? $model,
-        'created'  => $raw['created'] ?? null,
-        'content'  => is_string($choice) ? $choice : null,
-        'usage'    => is_array($usage) ? $usage : null,
-        'raw'      => $raw, // 디버깅 참고 (민감키 없음)
-    ];
-}
+// -------------------------------
+// 5) 웹 HTML 렌더링 (가독성 높은 카드 UI)
+// -------------------------------
+$qEsc = htmlspecialchars($userQuestion, ENT_QUOTES, 'UTF-8');
+$aEsc = htmlspecialchars($answer, ENT_QUOTES, 'UTF-8');
 
-/* -------------------- dispatch -------------------- */
-try {
-    if ($provider === 'openai') {
-        $out = call_openai($CFG, $messages, $model, $temperature, $max_tokens);
-    } elseif ($provider === 'openrouter') {
-        $out = call_openrouter($CFG, $messages, $model, $temperature, $max_tokens);
-    } else { // grok (xAI)
-        $out = call_grok($CFG, $messages, $model, $temperature, $max_tokens);
-    }
-    jexit(200, $out);
-} catch (Throwable $e) {
-    jexit(500, ['error'=>'unhandled', 'detail'=>sanitize_err($e->getMessage())]);
-}
+// HTML 템플릿
+?>
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chat Completion Result</title>
+<style>
+  :root{
+    --bg:#0f172a;         /* deep slate */
+    --card:#111827;       /* near-black */
+    --text:#e5e7eb;       /* slate-200 */
+    --muted:#94a3b8;      /* slate-400 */
+    --accent:#60a5fa;     /* blue-400 */
+    --border:#1f2937;     /* gray-800 */
+    --shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  html,body{background:var(--bg);color:var(--text);margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;}
+  .wrap{max-width:960px;margin:48px auto;padding:0 16px;}
+  .title{font-size:1.5rem;margin:0 0 18px 4px;color:var(--muted);letter-spacing:.2px}
+  .card{
+    background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.00));
+    border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow);
+    padding:22px 22px; margin-bottom:18px;
+  }
+  .label{display:flex;align-items:center;gap:10px;font-size:.9rem;color:var(--muted);margin-bottom:10px;letter-spacing:.3px}
+  .label .dot{width:8px;height:8px;border-radius:999px;background:var(--accent);box-shadow:0 0 0 4px rgba(96,165,250,.15)}
+  .content{white-space:pre-wrap;line-height:1.6;font-size:1.05rem}
+  .grid{display:grid;grid-template-columns:1fr;gap:16px}
+  @media (min-width:900px){ .grid{grid-template-columns:1fr 1fr} }
+  .badge{display:inline-block;font-size:.72rem;color:#0b1220;background:var(--accent);padding:4px 8px;border-radius:999px;margin-left:8px}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="title">OpenRouter · Chat Completions</div>
+
+    <div class="grid">
+      <!-- 1) Question -->
+      <section class="card">
+        <div class="label"><span class="dot"></span><strong>1. Question (by User)</strong></div>
+        <div class="content"><?= $qEsc ?></div>
+      </section>
+
+      <!-- 2) Answer -->
+      <section class="card">
+        <div class="label"><span class="dot"></span><strong>2. Answer (by LLM)</strong><span class="badge">generated</span></div>
+        <div class="content"><?= nl2br($aEsc) ?></div>
+      </section>
+    </div>
+  </div>
+</body>
+</html>

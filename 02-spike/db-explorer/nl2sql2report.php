@@ -3,7 +3,7 @@
  * nl2sql_mariadb.php — Natural Language to SQL (MariaDB) with OpenRouter Chat Completions
  * PHP 8.1+ / MariaDB 10.5+ / Apache or PHP-FPM
  *
- * ✅ 보안: DB/LLM 설정을 /etc/environment에서 직접 파싱(파일 I/O) — getenv()/$_ENV/$_SERVER 미사용
+ * ✅ 보안: DB/LLM 설정을 .env 에서 직접 파싱(파일 I/O) — getenv()/$_ENV/$_SERVER 미사용
  * ✅ 경로 폴백: /var/log / 캐시 디렉터리 권한 없으면 ./logs, ./schema_cache 로 자동 폴백
  * ✅ 문자셋 폴백: utf8mb4 → utf8
  * ✅ OpenRouter: 견고한 헤더, 명확한 오류 메시지
@@ -16,7 +16,7 @@ mb_internal_encoding('UTF-8');
 /* -------------------- helpers -------------------- */
 function html($s) { return htmlspecialchars((string)$s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
 
-/** Parse /etc/environment into an associative array without using getenv(). */
+/** Parse .env into an associative array without using getenv(). */
 function loadEnvFile(string $path): array {
     $env = [];
     if (!is_readable($path)) return $env;
@@ -88,8 +88,8 @@ function get_env_bool(array $ENV, string $key, bool $default): bool {
            (in_array($s, ['0','false','off','no','n'], true) ? false : $default);
 }
 
-/* -------------------- config from /etc/environment (no getenv) -------------------- */
-$ENV = loadEnvFile('/etc/environment');
+/* -------------------- config from .env (no getenv) -------------------- */
+$ENV = loadEnvFile('.env');
 
 $CFG = [
     // DB
@@ -338,7 +338,7 @@ function llmGenerateSql_viaOpenRouter(string $naturalQuestion, string $schemaTex
     global $CFG;
 
     if (!$CFG['or_api_key']) {
-        throw new RuntimeException("OPENROUTER_API_KEY 가 설정되어 있지 않습니다 (/etc/environment).");
+        throw new RuntimeException("OPENROUTER_API_KEY 가 설정되어 있지 않습니다 (.env).");
     }
 
     $system = <<<SYS
@@ -692,7 +692,7 @@ small.badge{display:inline-block;background:#eef2ff;border:1px solid #c7d2fe;col
   <details>
     <summary><b>도움말</b> (열기)</summary>
     <ul>
-      <li>/etc/environment 에서 설정을 <b>직접 파싱</b>합니다. (getenv/$_ENV/$_SERVER 미사용)</li>
+      <li>.env 에서 설정을 <b>직접 파싱</b>합니다. (getenv/$_ENV/$_SERVER 미사용)</li>
       <li>모델/엔드포인트: <code>OPENROUTER_MODEL</code>, <code>OPENROUTER_ENDPOINT</code></li>
       <li>실행 허용: <code>EXECUTION_ENABLED=true</code> (읽기 전용 DB 계정 권장)</li>
       <li>스키마 캐시 TTL: <?=$CFG['schema_cache_ttl']?>초 · 캐시 파일: <code><?=html($CFG['schema_cache_file'])?></code></li>

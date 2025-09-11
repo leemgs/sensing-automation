@@ -9,8 +9,8 @@ define('API_LIST_FILE', __DIR__.'/llm-api-list.json');
 
 function load_env_array(): array {
     $arr = [];
-    if (is_file('/etc/environment')) {
-        $parsed = @parse_ini_file('/etc/environment', false, INI_SCANNER_RAW);
+    if (is_file('./.env')) {
+        $parsed = @parse_ini_file('./.env', false, INI_SCANNER_RAW);
         if (is_array($parsed)) $arr = $parsed;
     }
     return $arr;
@@ -23,7 +23,7 @@ function get_env_value(string $key): string {
         $vv = trim((string)$arr[$key]);
         return trim($vv, "\"'");
     }
-    $vv = @shell_exec('/bin/bash -lc "source /etc/environment >/dev/null 2>&1; echo -n $'.$key.'"');
+    $vv = @shell_exec('/bin/bash -lc "source .env >/dev/null 2>&1; echo -n $'.$key.'"');
     if (is_string($vv) && trim($vv) !== '') return trim($vv);
     return '';
 }
