@@ -34,7 +34,7 @@ To enhance maintainability and completeness, progressive improvements are applie
 * `doc/`
 
   * Documentation of software development stages
-* `v01/` \~ `v05/`
+* `v01/` \~ `v04/`
 
   * Archived code and documentation by version
 * `README.md`
@@ -56,6 +56,6 @@ To enhance maintainability and completeness, progressive improvements are applie
 
 * `doc`: Updates related to software development phases
 * `feasibility`: Adjustment of project scope (e.g., excluding Python)
-* `v01` \~ `v05`: Versioned archives documenting the project’s evolution
+* `v01` \~ `v14`: Versioned archives documenting the project’s evolution
 
 ---
