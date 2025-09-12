@@ -4,6 +4,32 @@ require_once __DIR__.'/config.php';
 require_once __DIR__.'/utils.php';
 require_once __DIR__.'/llm_client.php';
 
+function preprocess_google_alerts(string $s): string {
+    $patterns = [
+        '/Facebook\s+Twitter\s+관련성\s+없는\s+검색결과\s+신고/iu',
+        '/검색결과\s+더보기/iu',
+        '/알림\s+수정/iu',
+        '/Google\s+알리미에\s+가입한\s+사용자에게\s+전송되는\s+이메일입니다\./iu',
+        '/모든\s+알림\s+보기/iu',
+        '/의견\s+보내기/iu',
+        '/^\s*Google\s*$/imu',
+    ];
+    foreach ($patterns as $p) { $s = preg_replace($p, ' ', $s); }
+    $s = preg_replace('/[ \t]+/u', ' ', $s);
+    $s = preg_replace('/(\r?\n){2,}/u', "\n", $s);
+    $lines = preg_split('/\r?\n/u', $s);
+    $seen = []; $out = [];
+    foreach ($lines as $line) {
+        $t = trim($line);
+        if ($t === '') continue;
+        $key = mb_strtolower(preg_replace('/[^\p{L}\p{N}]+/u','', $t));
+        if (isset($seen[$key])) continue;
+        $seen[$key] = true;
+        $out[] = $t;
+    }
+    return implode("\n", $out);
+}
+
 function build_system_prompt(): string {
     return <<<S
 응답의 최상단 단 한 줄에 아래 메타를 반드시 출력하세요:

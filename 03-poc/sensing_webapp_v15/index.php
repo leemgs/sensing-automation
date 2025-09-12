@@ -94,8 +94,8 @@ if (isset($_GET['api_id']) && $api_id !== ($apilist['active'] ?? '')) {
 }
 $active_api = api_get_active($apilist);
 
-$limit = isset($_GET['limit']) ? intval($_GET['limit']) : 20;
-if (!in_array($limit, [10,20,30,40,50], true)) $limit = 20;
+$limit = isset($_GET['limit']) ? intval($_GET['limit']) : 5;
+if (!in_array($limit, [5,10,20,30,40,50], true)) $limit = 5;
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 
 $action = $_GET['action'] ?? '';
@@ -313,7 +313,7 @@ if ($action === 'analyze' && $_SERVER['REQUEST_METHOD']==='POST') {
             if ($num <= 0 && $uid !== '') { $num = @imap_msgno($imap, (int)$uid); }
             if ($num <= 0) { $error = '선택된 메일이 없습니다. (번호 변환 실패)'; $popup = "<div style='color:#991b1b'><b>오류</b><br>".h($error)."</div>"; imap_close($imap);  }
             list($k, $content) = imap_fetch_best($imap, $num);
-            $plain_for_llm = ($k==='html') ? strip_tags($content) : $content;
+            $fmt = $_POST["fmt"] ?? "text"; $plain_for_llm = ($fmt==="html") ? (($k==="html") ? $content : nl2br(htmlspecialchars($content, ENT_QUOTES | ENT_SUBSTITUTE, "UTF-8"))) : (($k==="html") ? strip_tags($content) : $content);
             if (mb_stripos((string)$subject, 'google 알리미') !== false) { $plain_for_llm = preprocess_google_alerts($plain_for_llm); }
             list($ok, $res) = analyze_and_save($plain_for_llm, $active_api, $uid, $subject);
             if ($ok) {
@@ -378,10 +378,9 @@ if ($action === 'delete' && $_SERVER['REQUEST_METHOD']==='POST') {
     if ($server && $email && $pass && $nums) {
         $imap = imap_connect($server, $email, $pass);
         if ($imap) {
-            if ($num <= 0 && $uid !== '') { $num = @imap_msgno($imap, (int)$uid); }
-            $deleted = imap_delete_nums($imap, $nums);
+            list($deleted, $trashBox) = imap_move_to_trash($imap, $nums);
             imap_close($imap);
-            if ($deleted) { $popup = "<div><b>삭제 완료</b> (" . count($deleted) . "개) : " . h(implode(', ', $deleted)) . "</div>"; }
+            if ($deleted) { $popup = "<div><b>휴지통으로 이동 완료</b> (" . count($deleted) . "개) → " . h($trashBox ?: "Trash") . "<br>번호: " . h(implode(', ', $deleted)) . "</div>"; }
             else { $popup = "<div style='color:#991b1b'><b>오류</b><br>삭제할 항목이 없거나 실패했습니다.</div>"; }
         } else { $popup = "<div style='color:#991b1b'><b>오류</b><br>IMAP 접속 실패</div>"; }
     } else { $popup = "<div style='color:#991b1b'><b>오류</b><br>선택된 메일이 없습니다.</div>"; }
@@ -409,7 +408,7 @@ $has_next = $page < $total_pages;
 ?><?php if (isset($_GET['debug'])) { ini_set('display_errors','1'); error_reporting(E_ALL); } ?>
 <!doctype html>
 <meta charset="utf-8">
-<title>Gmail IMAP → LLM 센싱 자동화 (v14d)</title>
+<title>Gmail IMAP → LLM 센싱 자동화 (v15)</title>
 <style>
 body{font-family:system-ui,Segoe UI,Arial,sans-serif;margin:0;color:#111}
 header{background:#111;color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
@@ -439,11 +438,23 @@ select, input[type=password], input[type=text]{border:1px solid #e5e7eb;border-r
 #loading .box{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#111;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
 #spinner{width:22px;height:22px;border:3px solid #fff;border-top-color:transparent;border-radius:50%;display:inline-block;animation:spin 0.8s linear infinite;vertical-align:-4px;margin-right:8px}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* Compact action column */
+.opcol{line-height:1.35}
+.oprow{display:flex;gap:8px;align-items:center;margin:2px 0;flex-wrap:wrap}
+.oprow .label{font-weight:600;color:#374151;min-width:82px}
+.linkbtn{background:none;border:0;padding:0;margin:0;cursor:pointer;text-decoration:underline;color:#2563eb;font-size:.92rem}
+.linkbtn:hover{text-decoration:none;filter:none}
+.opcol a.link{color:#2563eb;text-decoration:underline;font-size:.92rem}
+.opcol a.link:hover{text-decoration:none}
+
+.badge{display:inline-block;padding:2px 6px;border-radius:999px;font-size:.72rem;line-height:1;background:#111;color:#fff;margin-right:6px}
+.badge-new{background:#dc2626}
 </style>
 
 <header>
   <div>
-    <strong>Gmail IMAP → LLM 센싱 자동화 (v14d)</strong>
+    <strong>Gmail IMAP → LLM 센싱 자동화 (v15)</strong>
     <div class="small">
       토큰: <?=$key_status?>
       &nbsp;|&nbsp; IMAP 서버: <?=h($server ?: $env_server)?> &nbsp;|&nbsp; IMAP 이메일: <?=h($email ?: $env_email)?>
@@ -470,82 +481,130 @@ select, input[type=password], input[type=text]{border:1px solid #e5e7eb;border-r
   </div>
 </header>
 
+
+<?php
+// --- VIEW HANDLER (HTML/Text) ---
+if (($action ?? '') === 'view' && isset($_GET['num'])) {
+    $mode = $_GET['mode'] ?? 'html';
+    $num = intval($_GET['num']);
+    $disp_idx = intval($_GET['idx'] ?? 0);
+    $imap = imap_connect($server, $email, $pass);
+    if ($imap) {
+        list($k, $content) = imap_fetch_best($imap, $num);
+        if ($mode === 'text') {
+            $text = ($k==='html') ? strip_tags($content) : $content;
+            $safe = htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            $popup = "<div><b>보기 (Text 형식)</b></div><pre style=\"white-space:pre-wrap;max-height:60vh;overflow:auto;background:#fff;padding:8px;border:1px solid #e5e7eb\">{$safe}</pre>";
+        } else {
+            $html = ($k==='html') ? $content : nl2br(htmlspecialchars($content, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'));
+            $popup = "<div><b>보기 (HTML 형식)</b></div><iframe style=\"width:100%;height:60vh;border:1px solid #e5e7eb;background:#fff\" srcdoc='".htmlspecialchars($html, ENT_QUOTES | ENT_SUBSTITUTE, "UTF-8")."'></iframe>";
+        }
+        imap_close($imap);
+    } else {
+        $popup = "<div style='color:#991b1b'><b>오류</b><br>IMAP 접속 실패</div>";
+    }
+}
+?>
 <main>
   <?php if (!empty($header_err)): ?><div class="err"><?=h($header_err)?></div><?php endif; ?>
   <?php if ($error): ?><div class="err"><?=h($error)?></div><?php endif; ?>
 
   <div class="card">
-    <form method="get" class="no-anim">
-      <div style="display:flex;gap:12px;flex-wrap:wrap">
-        <input type="hidden" name="api_id" value="<?=h($apilist['active'] ?? '')?>">
-        <div>
-          <label>IMAP 서버</label><br>
-          <input name="server" value="<?=h($server)?>" size="28" placeholder="imap.gmail.com" required>
-        </div>
-        <div>
-          <label>이메일</label><br>
-          <input name="email" value="<?=h($email)?>" size="28" required>
-        </div>
-        <div>
-          <label>비밀번호/앱 비밀번호</label><br>
-          <input name="pass" value="<?=h($pass)?>" size="20" type="password" required>
-        </div>
-        <div>
-          <label>출력 개수</label><br>
-          <select name="limit" onchange="this.form.page.value=1; this.form.submit()">
-            <?php foreach([10,20,30,40,50] as $n): ?>
-              <option value="<?=$n?>" <?=$limit==$n?'selected':''?>><?=$n?></option>
-            <?php endforeach; ?>
-          </select>
-          <input type="hidden" name="page" value="<?=$page?>">
-        </div>
-        <div style="align-self:flex-end">
-          <input type="hidden" name="page" value="1">
-          <button class="btn" type="submit">연결/새로고침</button>
-        </div>
-      </div>
-    </form>
+    
   </div>
 
   <?php if ($emails_page): ?>
-    <form method="post" action="?action=delete_preview" class="card">
+    <div class="card">
       <h3>메일 목록 (<?=$page?> / <?=$total_pages?> 페이지 · 총 <?=$total?>개)</h3>
       <div style="margin-bottom:8px;display:flex;gap:8px;align-items:center">
-        <button class="btn" type="submit">선택 삭제</button>
-        <span class="small">* 삭제 전 미리보기 창이 열립니다.</span>
-      </div>
+<div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+          <form method="get" style="display:flex;gap:8px;align-items:center" class="no-anim">
+            <input type="hidden" name="server" value="<?=h($server)?>">
+            <input type="hidden" name="email"  value="<?=h($email)?>">
+            <input type="hidden" name="pass"   value="<?=h($pass)?>">
+            <label>출력 개수</label>
+            <select name="limit" onchange="this.form.page.value=1; this.form.submit()">
+              <?php foreach([5,10,20,30,40,50] as $n): ?>
+                <option value="<?=$n?>" <?=$limit==$n?'selected':''?>><?=$n?></option>
+              <?php endforeach; ?>
+            </select>
+            <input type="hidden" name="page" value="<?=$page?>">
+            <div style="align-self:flex-end">
+              <input type="hidden" name="page" value="1">
+              <button class="btn" type="submit">연결/새로고침</button>
+            </div>
+          </form>
+        </div>
+</div>
       <input type="hidden" name="server" value="<?=h($server)?>">
       <input type="hidden" name="email" value="<?=h($email)?>">
       <input type="hidden" name="pass" value="<?=h($pass)?>">
       <table>
-        <thead><tr><th style="width:40px"><input type="checkbox" onclick="document.querySelectorAll('.chk').forEach(c=>c.checked=this.checked)"></th><th style="width:60px">No</th><th>제목</th><th>보낸사람</th><th style="width:180px">날짜</th><th style="width:280px">동작</th></tr></thead>
+        <thead><tr><th style="width:70px">삭제</th><th class="small">#</th><th>제목</th><th>보낸사람</th><th style="width:180px">날짜</th><th style="width:280px">동작</th></tr></thead>
         <tbody>
         <?php foreach ($emails_page as $m): ?>
           <tr>
-            <td><input type="checkbox" class="chk" name="nums[]" value="<?=$m['num']?>"></td>
+            <td>
+  <form method="post" action="?action=delete" style="display:inline" onsubmit="return __confirmDelete(event);">
+    <input type="hidden" name="server" value="<?=h($server)?>">
+    <input type="hidden" name="email"  value="<?=h($email)?>">
+    <input type="hidden" name="pass"   value="<?=h($pass)?>">
+    <input type="hidden" name="nums[]" value="<?=$m['num']?>">
+    <button class="btn" type="submit">삭제</button>
+  </form>
+</td>
             <td class="small">#<?=h((string)$m['idx'])?></td>
-            <td><?=h($m['subject'])?></td>
+            <td>
+              <?php if (!empty($m['is_new'])): ?>
+                <span class="badge badge-new">New</span>
+              <?php endif; ?>
+              <?=h($m['subject'])?>
+            </td>
             <td><?=h($m['from'])?></td>
             <td class="small"><?=h($m['date'])?></td>
-            <td>
-              <a class="btn" href="?<?=http_build_query(['server'=>$server,'email'=>$email,'pass'=>$pass,'limit'=>$limit,'page'=>$page,'api_id'=>$api_id,'action'=>'view','num'=>$m['num'],'idx'=>$m['idx']])?>">보기</a>
-              <form method="post" action="?action=analyze" style="display:inline" class="no-anim">
-                <input type="hidden" name="server" value="<?=h($server)?>">
-                <input type="hidden" name="email"  value="<?=h($email)?>">
-                <input type="hidden" name="pass"   value="<?=h($pass)?>">
-                <input type="hidden" name="num"    value="<?=$m['num']?>">
-                <input type="hidden" name="uid"    value="<?=$m['uid']?>">
-                <input type="hidden" name="subject" value="<?=h($m['subject'])?>">
-                <input type="hidden" name="from" value="<?=h($m['from'])?>">
-                <input type="hidden" name="date" value="<?=h($m['date'])?>">
-                <input type="hidden" name="idx" value="<?=$m['idx']?>">
-                <button class="btn" type="submit">LLM 분석</button>
-              </form>
-              <input type="hidden" name="subjects[<?=$m['num']?>]" value="<?=h($m['subject'])?>">
-              <input type="hidden" name="froms[<?=$m['num']?>]" value="<?=h($m['from'])?>">
-              <input type="hidden" name="dates[<?=$m['num']?>]" value="<?=h($m['date'])?>">
-            </td>
-          </tr>
+            
+
+
+<td class="opcol" style="min-width:220px">
+  <div class="oprow">
+    <span class="label">HTML형식:</span>
+    <a class="link" href="?<?=http_build_query(['server'=>$server,'email'=>$email,'pass'=>$pass,'action'=>'view','mode'=>'html','num'=>$m['num'],'idx'=>$m['idx']])?>">메일보기</a>
+    <form method="post" action="?action=analyze" style="display:inline" class="no-anim">
+      <input type="hidden" name="server" value="<?=h($server)?>">
+      <input type="hidden" name="email"  value="<?=h($email)?>">
+      <input type="hidden" name="pass"   value="<?=h($pass)?>">
+      <input type="hidden" name="num"    value="<?=$m['num']?>">
+      <input type="hidden" name="uid"    value="<?=$m['uid']?>">
+      <input type="hidden" name="subject" value="<?=h($m['subject'])?>">
+      <input type="hidden" name="from" value="<?=h($m['from'])?>">
+      <input type="hidden" name="date" value="<?=h($m['date'])?>">
+      <input type="hidden" name="idx" value="<?=$m['idx']?>">
+      <input type="hidden" name="fmt" value="html">
+      <button class="linkbtn" type="submit">LLM분석</button>
+    </form>
+  </div>
+  <div class="oprow">
+    <span class="label">TEXT형식:</span>
+    <a class="link" href="?<?=http_build_query(['server'=>$server,'email'=>$email,'pass'=>$pass,'action'=>'view','mode'=>'text','num'=>$m['num'],'idx'=>$m['idx']])?>">메일보기</a>
+    <form method="post" action="?action=analyze" style="display:inline" class="no-anim">
+      <input type="hidden" name="server" value="<?=h($server)?>">
+      <input type="hidden" name="email"  value="<?=h($email)?>">
+      <input type="hidden" name="pass"   value="<?=h($pass)?>">
+      <input type="hidden" name="num"    value="<?=$m['num']?>">
+      <input type="hidden" name="uid"    value="<?=$m['uid']?>">
+      <input type="hidden" name="subject" value="<?=h($m['subject'])?>">
+      <input type="hidden" name="from" value="<?=h($m['from'])?>">
+      <input type="hidden" name="date" value="<?=h($m['date'])?>">
+      <input type="hidden" name="idx" value="<?=$m['idx']?>">
+      <input type="hidden" name="fmt" value="text">
+      <button class="linkbtn" type="submit">LLM분석</button>
+    </form>
+  </div>
+  <input type="hidden" name="subjects[<?=$m['num']?>]" value="<?=h($m['subject'])?>">
+  <input type="hidden" name="froms[<?=$m['num']?>]" value="<?=h($m['from'])?>">
+  <input type="hidden" name="dates[<?=$m['num']?>]" value="<?=h($m['date'])?>">
+</td>
+</tr>
         <?php endforeach; ?>
         </tbody>
       </table>
@@ -608,7 +667,7 @@ select, input[type=password], input[type=text]{border:1px solid #e5e7eb;border-r
           <button class="btn" type="submit" <?=$page<$total_pages?'':'disabled'?>>끝 »</button>
         </form>
       </div>
-    </form>
+    </div>
   <?php endif; ?>
 </main>
 
@@ -658,6 +717,16 @@ function showPopup(html){
 
 // Auto-apply API selection + Loading indicator
 var __loadTimer=null, __loadStart=0;
+
+function __confirmDelete(e){
+  // Ask user and manage overlay + event propagation cleanly
+  if (!confirm('이 메일을 삭제하시겠습니까?')) {
+    if (e && e.preventDefault) { e.preventDefault(); e.stopImmediatePropagation(); }
+    return false;
+  }
+  __showLoading();
+  return true;
+}
 function __showLoading(){
   var el=document.getElementById('loading'); if(!el) return;
   el.style.display='block';
@@ -683,6 +752,12 @@ function __hideLoading(){ var el=document.getElementById('loading'); if(el) el.s
   // Action links
   document.querySelectorAll('a.btn').forEach(a=>{
     a.addEventListener('click', __showLoading);
+  });
+  // 메일보기 링크 클릭 시에도 로딩 아이콘 표시
+  document.querySelectorAll('a.link').forEach(a=>{
+    if ((a.textContent||'').trim().includes('메일보기')) {
+      a.addEventListener('click', __showLoading);
+    }
   });
 })();
 

@@ -27,6 +27,7 @@ function imap_list_page($imap, int $limit=10, int $page=1): array {
             'subject' => isset($o->subject) ? imap_utf8($o->subject) : '(제목 없음)',
             'from' => isset($o->from) ? imap_utf8($o->from) : '(보낸사람 없음)',
             'date' => isset($o->date) ? $o->date : '',
+            'is_new' => (isset($o->seen) ? !$o->seen : true),
         ];
     }
     return $out;
@@ -70,4 +71,34 @@ function imap_delete_nums($imap, array $nums): array {
     }
     @imap_expunge($imap);
     return $deleted;
+}
+
+
+function imap_move_to_trash($imap, array $nums): array {
+    // Try to move messages to a "Trash" mailbox (server-dependent naming)
+    $candidates = [
+        "[Gmail]/Trash", "[Google Mail]/Trash", 
+        "Trash", "INBOX.Trash", 
+        "Deleted Items", "Deleted Messages"
+    ];
+    $moved = [];
+    $destUsed = '';
+
+    // Move each message individually so partial success is captured
+    foreach ($nums as $n) {
+        $n = intval($n);
+        if ($n <= 0) continue;
+        $ok = false;
+        foreach ($candidates as $dest) {
+            if (@imap_mail_move($imap, (string)$n, $dest)) {
+                $ok = true;
+                $destUsed = $dest;
+                break;
+            }
+        }
+        if ($ok) { $moved[] = $n; }
+    }
+    // Apply expunge to finalize move out of source mailbox
+    @imap_expunge($imap);
+    return [$moved, $destUsed];
 }

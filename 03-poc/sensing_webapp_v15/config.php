@@ -7,14 +7,15 @@ define('SAVE_BASE', '/var/www/html/sensing');
 define('LOG_DIR', SAVE_BASE.'/logs');
 define('API_LIST_FILE', __DIR__.'/llm-api-list.json');
 
+
 function load_env_array(): array {
-    $arr = [];
-    if (is_file('/etc/environment')) {
-        $parsed = @parse_ini_file('/etc/environment', false, INI_SCANNER_RAW);
-        if (is_array($parsed)) $arr = $parsed;
-    }
-    return $arr;
+    // Always read from project .env (no /etc/environment; no getenv())
+    $envPath = __DIR__.'/.env';
+    if (!is_file($envPath)) return [];
+    $parsed = @parse_ini_file($envPath, false, INI_SCANNER_RAW);
+    return is_array($parsed) ? $parsed : [];
 }
+
 function get_env_value(string $key): string {
     $v = getenv($key);
     if ($v && trim($v) !== '') return trim($v);
@@ -23,7 +24,7 @@ function get_env_value(string $key): string {
         $vv = trim((string)$arr[$key]);
         return trim($vv, "\"'");
     }
-    $vv = @shell_exec('/bin/bash -lc "source /etc/environment >/dev/null 2>&1; echo -n $'.$key.'"');
+    $vv = @shell_exec('/bin/bash -lc "source .env >/dev/null 2>&1; echo -n $'.$key.'"');
     if (is_string($vv) && trim($vv) !== '') return trim($vv);
     return '';
 }

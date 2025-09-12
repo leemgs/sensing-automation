@@ -4,7 +4,7 @@ require_once __DIR__.'/config.php';
 
 function llm_chat_complete(array $messages, array $api, ?string &$raw_response_out=null): array {
     $apiKey = get_env_value($api['auth_env'] ?? '');
-    if ($apiKey === '') return [false, 'API 키를 읽을 수 없습니다. /etc/environment 확인 필요 (env: '.($api['auth_env'] ?? '').')'];
+    if ($apiKey === '') return [false, 'API 키를 읽을 수 없습니다. .env 확인 필요 (env: '.($api['auth_env'] ?? '').')'];
 
     $payload = [
         'model' => $api['model'] ?? '',
