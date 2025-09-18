@@ -410,7 +410,7 @@ $has_next = $page < $total_pages;
 ?><?php if (isset($_GET['debug'])) { ini_set('display_errors','1'); error_reporting(E_ALL); } ?>
 <!doctype html>
 <meta charset="utf-8">
-<title>Gmail IMAP → LLM 센싱 자동화 (v15)</title>
+<title>Gmail IMAP → LLM 센싱 자동화 (v24)</title>
 <style>
 body{font-family:system-ui,Segoe UI,Arial,sans-serif;margin:0;color:#111}
 header{background:#111;color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
@@ -456,7 +456,7 @@ select, input[type=password], input[type=text]{border:1px solid #e5e7eb;border-r
 
 <header>
   <div>
-    <strong>Gmail IMAP → LLM 센싱 자동화 (v15)</strong>
+    <strong>Gmail IMAP → LLM 센싱 자동화 (v24)</strong>
     <div class="small">
       토큰: <?=$key_status?>
       &nbsp;|&nbsp; 서버: <?=h($server ?: $env_server)?> &nbsp;|&nbsp; 이메일: <?=h($email ?: $env_email)?>
