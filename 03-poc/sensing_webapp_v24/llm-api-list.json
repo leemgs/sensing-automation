@@ -10,8 +10,9 @@
             "headers": {
                 "Content-Type": "application\/json"
             },
-            "default_max_tokens": 512,
-            "default_temperature": 0.2
+            "default_max_tokens": 1400,
+            "default_temperature": 0.2,
+            "authorization": "Bearer"
         },
         {
             "id": "hfrouter-kimi",
@@ -23,7 +24,8 @@
                 "Content-Type": "application\/json"
             },
             "default_max_tokens": 1400,
-            "default_temperature": 0.2
+            "default_temperature": 0.2,
+            "authorization": "Bearer"
         }
     ]
 }
