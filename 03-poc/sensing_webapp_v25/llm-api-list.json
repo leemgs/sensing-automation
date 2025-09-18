@@ -1,0 +1,31 @@
+{
+    "active": "openrouter",
+    "items": [
+        {
+            "id": "openrouter",
+            "label": "OpenRouter: openai\/gpt-4o",
+            "endpoint": "https:\/\/openrouter.ai\/api\/v1\/chat\/completions",
+            "model": "openai\/gpt-4o",
+            "auth_env": "OPENROUTER_API_KEY",
+            "headers": {
+                "Content-Type": "application\/json"
+            },
+            "default_max_tokens": 1400,
+            "default_temperature": 0.2,
+            "authorization": "Bearer"
+        },
+        {
+            "id": "hfrouter-kimi",
+            "label": "HF Router: moonshotai\/Kimi-K2-Instruct-0905:together",
+            "endpoint": "https:\/\/router.huggingface.co\/v1\/chat\/completions",
+            "model": "moonshotai\/Kimi-K2-Instruct-0905:together",
+            "auth_env": "HF_TOKEN",
+            "headers": {
+                "Content-Type": "application\/json"
+            },
+            "default_max_tokens": 1400,
+            "default_temperature": 0.2,
+            "authorization": "Bearer"
+        }
+    ]
+}
