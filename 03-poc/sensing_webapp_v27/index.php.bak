@@ -552,8 +552,8 @@ if (($action ?? '') === 'view' && isset($_GET['num'])) {
       <input type="hidden" name="server" value="<?=h($server)?>">
       <input type="hidden" name="email" value="<?=h($email)?>">
       <input type="hidden" name="pass" value="<?=h($pass)?>">
-      <table style="width:100%;table-layout:fixed;">
-        <thead><tr><th style="width:70px">삭제</th><th class="small" style="width:60px">#</th><th style="width:50%">제목</th><th style="width:20%">보낸사람</th><th style="width:15%">날짜</th><th style="width:280px">동작</th></tr></thead>
+      <table>
+        <thead><tr><th style="width:70px">삭제</th><th class="small">#</th><th>제목</th><th>보낸사람</th><th style="width:180px">날짜</th><th style="width:280px">동작</th></tr></thead>
         <tbody>
         <?php foreach ($emails_page as $m): ?>
           <tr>
@@ -567,11 +567,11 @@ if (($action ?? '') === 'view' && isset($_GET['num'])) {
   </form>
 </td>
             <td class="small">#<?=h((string)$m['idx'])?></td>
-            <td style="width:50%;word-break:break-word;overflow:hidden;text-overflow:ellipsis;">
+            <td>
               <?php if ($__proto !== 'POP3' && !empty($m['is_new'])): ?><span class="badge badge-new">New</span><?php endif; ?>
               <?=h($m['subject'])?>
             </td>
-            <td style="width:20%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><?=h($m['from'])?></td>
+            <td><?=h($m['from'])?></td>
             <td class="small"><?=h($m['date'])?></td>
             
 
