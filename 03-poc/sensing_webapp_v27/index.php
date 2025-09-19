@@ -483,7 +483,7 @@ select, input[type=password], input[type=text]{border:1px solid #e5e7eb;border-r
     </form>
     <a class="btn" href="?action=api_manage&<?=http_build_query(['server'=>$server,'email'=>$email,'pass'=>$pass,'limit'=>$limit,'page'=>$page,'api_id'=>$api_id])?>">⚙️ LLM API 관리</a>
     <a class="btn" href="?action=prompt&<?=http_build_query(['server'=>$server,'email'=>$email,'pass'=>$pass,'limit'=>$limit,'page'=>$page,'api_id'=>$api_id])?>">📝 프롬프트 열람</a>
-    <a class="btn"href="healthcheck.php" title="Healthcheck" style="text-decoration:none;">🩺 Health</a>
+    <a class="btn" href="healthcheck.php" target="_blank" title="Healthcheck" style="text-decoration:none;">🩺 Health</a>
     <a class="btn"href="index.php" title="Home" style="text-decoration:none;">🏠 Home</a>    
   </div>
 
