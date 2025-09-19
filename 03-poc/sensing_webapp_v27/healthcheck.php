@@ -2,43 +2,43 @@
 declare(strict_types=1);
 require_once __DIR__."/config.php";
 
-header("Content-Type: text/plain; charset=UTF-8");
+header("Content-Type: text/html; charset=UTF-8");
 
-echo "=== PHP Info ===\n";
-echo "PHP Version: ".phpversion()."\n";
-echo "IMAP loaded: ".(extension_loaded('imap') ? 'yes' : 'no')."\n";
-echo "Extensions: ".implode(", ", get_loaded_extensions())."\n\n";
+echo "<b>=== PHP Info ===</b><br>";
+echo "PHP Version: ".phpversion()."<br>";
+echo "IMAP loaded: ".(extension_loaded('imap') ? 'yes' : 'no')."<br>";
+echo "Extensions: ".implode(", ", get_loaded_extensions())."<br><br>";
 
 
 
 /** ===== Helpers ===== */
 function check_mailbox(string $label, string $mailbox, string $email, string $pass): void {
-    echo "Protocol: {$label}\n";
-    echo "Mailbox:  {$mailbox}\n";
-    echo "Login:    {$email}\n";
+    echo "Protocol: {$label}<br>";
+    echo "Mailbox:  {$mailbox}<br>";
+    echo "Login:    {$email}<br>";
     if (!$mailbox || !$email || !$pass) {
-        echo "⚠️  Skipped: missing server/email/password in .env\n\n";
+        echo "⚠️  Skipped: missing server/email/password in .env<br><br>";
         return;
     }
     $mbox = @imap_open($mailbox, $email, $pass);
     if ($mbox === false) {
         $err = imap_last_error();
-        echo "❌ LOGIN FAIL: ".($err ?: 'unknown error')."\n\n";
+        echo "❌ LOGIN FAIL: ".($err ?: 'unknown error')."<br><br>";
         return;
     }
     $num = @imap_num_msg($mbox);
     if ($num === false) $num = 0;
-    echo "✅ LOGIN OK, Messages: {$num}\n";
+    echo "✅ LOGIN OK, Messages: {$num}<br>";
     if ($num > 0) {
         $first = 1;
         $ov = @imap_fetch_overview($mbox, (string)$first, 0);
         if ($ov && isset($ov[0])) {
             $subj = isset($ov[0]->subject) ? @imap_utf8($ov[0]->subject) : '(no subject)';
-            echo "   First message subject: ".(is_string($subj) ? $subj : '(decode fail)')."\n";
+            echo "   First message subject: ".(is_string($subj) ? $subj : '(decode fail)')."<br>";
         }
     }
     imap_close($mbox);
-    echo "\n";
+    echo "<br>";
 }
 
 function build_llm_headers(array $api): array {
@@ -61,13 +61,13 @@ function check_llm_api(array $api): void {
     $id = $api['id'] ?? '(no-id)';
     $endpoint = $api['endpoint'] ?? '';
     $model = $api['model'] ?? '';
-    echo "- API: ".$id."\n";
-    echo "  Endpoint: ".$endpoint."\n";
-    echo "  Model: ".$model."\n";
+    echo "- API: ".$id."<br>";
+    echo "  Endpoint: ".$endpoint."<br>";
+    echo "  Model: ".$model."<br>";
 
     list($headers, $apiKey) = build_llm_headers($api);
     if ($apiKey === '') {
-        echo "  ⚠️  Skipped: missing env key ".($api['auth_env'] ?? '(none)')."\n\n";
+        echo "  ⚠️  Skipped: missing env key ".($api['auth_env'] ?? '(none)')."<br><br>";
         return;
     }
 
@@ -94,7 +94,7 @@ function check_llm_api(array $api): void {
     if ($resp === false) {
         $err = curl_error($ch);
         curl_close($ch);
-        echo "  ❌ Request error: ".$err."\n\n";
+        echo "  ❌ Request error: ".$err."<br><br>";
         return;
     }
     $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -103,16 +103,16 @@ function check_llm_api(array $api): void {
     if ($code >= 200 && $code < 300) {
         $j = json_decode($resp, true);
         $ok = is_array($j) && isset($j['choices'][0]['message']['content']);
-        echo $ok ? "  ✅ Auth OK (HTTP $code)\n\n" : "  ✅ HTTP $code but response not fully parsed\n\n";
+        echo $ok ? "  ✅ Auth OK (HTTP $code)<br><br>" : "  ✅ HTTP $code but response not fully parsed<br><br>";
     } else {
         $j = json_decode($resp, true);
         $emsg = is_array($j) && isset($j['error']) ? json_encode($j['error'], JSON_UNESCAPED_UNICODE) : $resp;
-        echo "  ❌ HTTP $code: ".$emsg."\n\n";
+        echo "  ❌ HTTP $code: ".$emsg."<br><br>";
     }
 }
 
 /** ===== Run checks ===== */
-echo "=== Mail Checks ===\n";
+echo "<b>=== Mail Checks ===</b><br>";
 // IMAP (993/ssl)
 $imapServer = get_env_value("IMAP_SERVER");
 $imapEmail  = get_env_value("IMAP_EMAIL");
@@ -130,13 +130,13 @@ $popUser = get_env_value("POP3_USER") ?: $popEmail;
 check_mailbox("POP3", $popMbox, $popUser, $popPass);
 
 $proto = strtoupper(get_env_value("DEFAULT_MAIL_PROTOCOL") ?: "IMAP");
-echo "Configured DEFAULT_MAIL_PROTOCOL: ".$proto."\n\n";
+echo "Configured DEFAULT_MAIL_PROTOCOL: ".$proto."<br><br>";
 
-echo "=== LLM API Auth Checks ===\n";
+echo "<b>=== LLM API Auth Checks ===</b><br>";
 $apilist = api_list_load();
 $items = $apilist['items'] ?? [];
 if (!$items) {
-    echo "No LLM items found in llm-api-list.json\n";
+    echo "No LLM items found in llm-api-list.json<br>";
 } else {
     foreach ($items as $api) {
         check_llm_api($api);
